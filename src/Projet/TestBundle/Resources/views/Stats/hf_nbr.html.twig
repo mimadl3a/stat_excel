@@ -24,7 +24,7 @@ parent() }}
 				</div>
 			</div>
 
-			<div class="col-lg-6">
+			<div class="col-lg-4">
 
 				<div class="panel panel-primary">
 					<div class="panel-heading">
@@ -37,7 +37,7 @@ parent() }}
 					</div>
 				</div>
 			</div>
-			<div class="col-lg-6">
+			<div class="col-lg-4">
 
 				<div class="panel panel-primary">
 					<div class="panel-heading">
@@ -47,6 +47,19 @@ parent() }}
 					</div>
 					<div class="panel-body">
 						<div id="graph"></div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4">
+
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+						<h3 class="panel-title">
+							<i class="fa fa-bar-chart-o"></i> Statistiques par cat&eacute;gorie
+						</h3>
+					</div>
+					<div class="panel-body">
+						<div id="graph_cat"></div>
 					</div>
 				</div>
 			</div>
@@ -95,6 +108,11 @@ parent() }}
 			<script type="text/javascript">
 			
 			function stats() {
+				window.a = Morris.Donut({
+					element: 'graph_cat',
+					data: {{ stats_cat|raw }},
+					colors:[{{ couleur2|raw }}]
+				});
 				window.b = Morris.Donut({
 					element: 'graph_cty',
 					data: {{ stats_ctype|raw }},
@@ -110,12 +128,15 @@ parent() }}
 			$(document).ready(function() {
 				stats();
 
+				var StatsResize1;
 				var StatsResize2;
 				var StatsResize3;
 				
 			    $(window).resize(function(event){
 			    	event.preventDefault();
 
+			    	clearTimeout(StatsResize1);
+			    	StatsResize1 = setTimeout(window.a.redraw(), 1000);
 			    	clearTimeout(StatsResize2);
 			    	StatsResize2 = setTimeout(window.b.redraw(), 1000);
 			    	clearTimeout(StatsResize3);

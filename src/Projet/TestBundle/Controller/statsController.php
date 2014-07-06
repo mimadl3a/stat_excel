@@ -98,21 +98,21 @@ class statsController extends Controller
     	 
     	 
     	 
-    	 
+
 
     	//DATA POUR NOMBRE DE CDI ET CDD
     	$background_colors1 = array('#8B7500','#7FFF00', '#FFEFD5', '#EE4000', '#495E67');
-    	 
+    	
     	$rsm = new ResultSetMappingBuilder($em);
     	$rsm->addScalarResult('nbr', 'count');
     	$rsm->addScalarResult('typec', 'd.typeContrat');
-    	 
+    	
     	$data_sty_jason = "";
-    	 
+    	
     	$data_sty = $em->createNativeQuery("SELECT count(d.id) as nbr, d.typeContrat as typec FROM data d"
     			." GROUP BY d.typeContrat"
     			, $rsm)->getResult();
-    	 
+    	
     	$data_sty_jason .= "[";
     	$o1 = 0;
     	$col1 ="";
@@ -122,8 +122,38 @@ class statsController extends Controller
     		$o1++;
     	}
     	$data_sty_jason .= "]";
-    	 
-    	 
+    	
+
+    	
+    	
+    	
+    	
+    	
+
+    	//DATA POUR NOMBRE PAR CATEGORIE
+    	$background_colors2 = array('#495E67','#8B7500', '#EE4000', '#7FFF00', '#FFEFD5');
+    	
+    	$rsm = new ResultSetMappingBuilder($em);
+    	$rsm->addScalarResult('nbr', 'count');
+    	$rsm->addScalarResult('cat', 'd.categorie');
+    	
+    	$data_cat_jason = "";
+    	
+    	$data_cat = $em->createNativeQuery("SELECT count(d.id) as nbr, d.categorie as cat FROM data d"
+    			." GROUP BY d.categorie"
+    			, $rsm)->getResult();
+    	
+    	$data_cat_jason .= "[";
+    	$o2 = 0;
+    	$col2 ="";
+    	foreach ($data_cat as $data){
+    		$data_cat_jason .= "{value: ".$data['count'].", label: '".$data['d.categorie']."'},";
+    		$col2 .= "'".$background_colors2[$o2]."',";
+    		$o2++;
+    	}
+    	$data_cat_jason .= "]";
+    	
+    	
     	 
     	 
     	 
@@ -134,6 +164,8 @@ class statsController extends Controller
 				"couleur" => $col,
         		"stats_ctype" => $data_sty_jason,
 				"couleur1" => $col1,
+        		"stats_cat" => $data_cat_jason,
+				"couleur2" => $col2,
 				"stats_age" => $data_age_jason
         	)
 		);
