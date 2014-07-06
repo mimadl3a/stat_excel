@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Administration{% endblock %}</title>
+        {% block stylesheets %}
+        	<meta name="viewport" content="width=device-width, initial-scale=1">
+        	<!-- Bootstrap core CSS -->
+		    <link href="{{ asset('bootstrap/css/bootstrap.css') }}" rel="stylesheet">
+		
+		    <!-- Add custom CSS here -->
+		    <link href="{{ asset('sb-admin/css/sb-admin.css') }}" rel="stylesheet">
+		    <link rel="stylesheet" href="{{ asset('sb-admin/font-awesome/css/font-awesome.min.css') }}">
+		    
+		    
+		    <!-- JavaScript -->
+		    <script src="{{ asset('js/jquery.min.js') }}"></script>
+		
+		    
+		    
+        	<script src="{{ asset('bootstrap/js/bootstrap.js') }}"></script>
+        	<script type="text/javascript" src="{{ asset('js/jquery.tablesorter.min.js') }}"></script>
+		    
+		    
+		    <link rel="stylesheet" href="{{ asset('css/ringing.css')}}">
+		    <link rel="stylesheet" href="{{ asset('css/jquery-ui.css')}}">
+        	<script src="{{ asset('js/jquery-ui.js')}}"></script>
+		    
+		    
+        {% endblock %}
+        
+        
+        
+                
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+    </head>
+    <body>
+        {% block body %}
+        	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="">Manager</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+          <ul class="nav navbar-nav side-nav">
+            <li {% if "p_homepage" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_homepage') }}"><span class="glyphicon glyphicon-upload"></span> Transfer de donn&eacute;es</a></li>
+            
+            
+
+            	<li {% if "p_stats_hf_nbr" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_stats_hf_nbr') }}"><span class="glyphicon glyphicon-adjust"></span> Effectif global par sexe</a></li>
+           
+            <li 
+            {% 
+           		if "region" in app.request.attributes.get('_route') or "ville" in app.request.attributes.get('_route') or "_cp" in app.request.attributes.get('_route') 
+            %}class="active"
+            {% 
+            	endif 
+            %}><a href=""><span class="glyphicon glyphicon-th-list"></span> Gestion des regions</a></li>
+           
+            
+            
+            <li class="dropdown {% if "partenaire" in app.request.attributes.get('_route') %}active{% endif %}">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-folder-open"></i> &nbsp;Partenaires <span class="glyphicon glyphicon-chevron-down"></span></a>
+              <ul class="dropdown-menu">
+                <li style="background-color:maroon;"><a href="">Partenaires type</a></li>
+                <li style="background-color:purple;"><a href="">Liste des partenaires</a></li>
+              </ul>
+            </li>
+            
+            	<li {% if "magasin" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href=""><span class="glyphicon glyphicon-tags"></span>&nbsp; Gestion des magasins</a></li>
+           
+            
+           
+            	<li {% if "forum" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href=""><span class="glyphicon glyphicon-comment"></span>&nbsp; Gestion des forums</a></li>
+            
+            
+            	<li {% if "metier" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href=""><span class="glyphicon glyphicon-briefcase"></span>&nbsp; Gestion des m&eacute;tiers</a></li>
+            
+            
+            	<li {% if "experience" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href=""><span class="glyphicon glyphicon-credit-card"></span>&nbsp; Gestion des experiences</a></li>
+            
+            
+            	<li {% if "utilisateur" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href=""><span class="glyphicon glyphicon-user"></span>&nbsp; Gestion des utilisateurs</a></li>
+            
+            
+            	<li {% if "status" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href=""><span class="glyphicon glyphicon-send"></span>&nbsp; Gestion des status</a></li>
+           
+            
+            	<li {% if "profil" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href=""><span class="glyphicon glyphicon-filter"></span>&nbsp; Gestion des profils</a></li>
+           
+            
+          </ul>
+
+          <ul class="nav navbar-nav navbar-right navbar-user">
+            <li class="dropdown messages-dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="display:none"><i class="fa fa-envelope"></i> Messages <span class="badge">77</span> <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li class="dropdown-header">7 New Messages</li>
+                <li class="message-preview">
+                  <a href="#">
+                    <span class="avatar"><img src="http://placehold.it/50x50"></span>
+                    <span class="name">John Smith:</span>
+                    <span class="message">Hey there, I wanted to ask you something...</span>
+                    <span class="time"><i class="fa fa-clock-o"></i> 4:34 PM</span>
+                  </a>
+                </li>
+                <li class="divider"></li>
+                <li class="message-preview">
+                  <a href="#">
+                    <span class="avatar"><img src="http://placehold.it/50x50"></span>
+                    <span class="name">John Smith:</span>
+                    <span class="message">Hey there, I wanted to ask you something...</span>
+                    <span class="time"><i class="fa fa-clock-o"></i> 4:34 PM</span>
+                  </a>
+                </li>
+                <li class="divider"></li>
+                <li class="message-preview">
+                  <a href="#">
+                    <span class="avatar"><img src="http://placehold.it/50x50"></span>
+                    <span class="name">John Smith:</span>
+                    <span class="message">Hey there, I wanted to ask you something...</span>
+                    <span class="time"><i class="fa fa-clock-o"></i> 4:34 PM</span>
+                  </a>
+                </li>
+                <li class="divider"></li>
+                <li><a href="#">View Inbox <span class="badge">7</span></a></li>
+              </ul>
+            </li>
+            
+            {% if app.session.get('nbr_rdv') %}
+            
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              	
+              	<img class="bell" src="{{ asset('images/bell.png') }}" />
+              	<label style="font-family:arial;font-weight:lighter">Notification</label> <b class="caret"></b></a>
+              	<ul class="dropdown-menu">
+              	
+              	<li class="divider"></li>
+                <li><a href="{{ path('calendar') }}">
+                	<i class="glyphicon glyphicon-calendar"></i> 
+                		Vous avez <b>{{ app.session.get('nbr_rdv') }}</b> RDV a venir (+7 jours)</a>
+                </li>
+                <li class="divider"></li>
+                
+              </ul>
+            </li>
+            {% endif %}
+            
+            <li class="dropdown {% if "stats" in app.request.attributes.get('_route') %}active{% endif %}">
+              <a href=""><span class="glyphicon glyphicon-stats"></span>  Statistiques</a>
+            </li>
+            <li class="dropdown {% if "calendar" in app.request.attributes.get('_route') %}active{% endif %}">
+              <a href=""><span class="glyphicon glyphicon-calendar"></span>  Calendrier RDV</a>
+            </li>
+            
+            <li class="dropdown user-dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>   <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#"><i class="fa fa-gear"></i> Mon Profile</a></li>
+               
+                <li class="divider"></li>
+                <li><a href=""><i class="fa fa-power-off"></i> Sortir</a></li>
+              </ul>
+            </li>
+            
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </nav>
+        {% endblock %}
+        
+        {% block javascript %}
+        	
+		    
+			
+		    
+		    
+		    <script>
+				$(document).ready(function(){
+					$(function(){
+						$("#liste_cat").tablesorter();
+						$("#liste_cgv").tablesorter();
+						$("#liste_prd").tablesorter();
+					});
+				});
+				
+				$( "#liste-region" ).change(function() {
+					$('#liste-ville').prop('disabled', true);
+					$('#data_codepostale').prop('disabled', true);
+					$('#btn-submit').prop('disabled', true);
+					$("#progBar").show();
+					$.ajax({
+						type: "POST",
+						url: "",
+						data: { region: $( "#liste-region" ).val() },
+						success: function(data){
+							//alert(data);
+							$('#liste-ville').prop('disabled', false);
+							$( "#liste-ville" ).html(data);
+							$("#progBar").hide();
+						},
+						dataType: "html"
+					});
+				});
+
+
+				
+				$( "#liste-ville" ).change(function() {
+					$("#progBar").show();
+					$('#data_codepostale').prop('disabled', true);
+					$.ajax({
+						type: "POST",
+						url: "",
+						data: { ville: $( "#liste-ville" ).val() },
+						success: function(data){
+							//alert(data);
+							$('#data_codepostale').prop('disabled', false);
+							$('#btn-submit').prop('disabled', false);
+							$( "#data_codepostale" ).html(data);
+							$("#progBar").hide();
+						},
+						dataType: "html"
+					});
+				});
+
+				
+
+
+
+
+
+				
+				$( "#search-cat" ).keyup(function() {
+					$("#progBar").show();
+					$.ajax({
+						type: "POST",
+						url: "",
+						data: { variable: $( "#search-cat" ).val(), page:'1' },
+						success: function(data){
+							$("#progBar").hide();
+							$( "#contenu-cat" ).html( data );
+							$("#liste_cat").tablesorter();
+							$( "#search-cat" ).blur();
+						},
+						dataType: "html"
+					});
+				});
+
+
+				function liste_cat(page){
+					$("#progBar").show();
+					$.ajax({
+						type: "POST",
+						url: "",
+						data: { variable: $( "#search-cat" ).val(), page:page },
+						success: function(data){
+							$("#progBar").hide();
+							$( "#contenu-cat" ).html( data );
+							$("#liste_cat").tablesorter();
+							$( "#search-cat" ).blur();
+						},
+						dataType: "html"
+					});
+				}
+
+				$( "#search-cgv" ).keyup(function() {
+					$.ajax({
+						type: "POST",
+						url: "",
+						data: { variable: $( "#search-cgv" ).val() },
+						success: function(data){
+							$( "#contenu-cgv" ).html( data );
+							$("#liste_cgv").tablesorter();
+							$( "#search-cgv" ).blur();
+						},
+						dataType: "html"
+					});
+				});
+
+				
+				
+				$(".alert").delay(6000).toggle( "blind" );
+
+				 function spr(route, msg) {
+					 $("#msg-alert").html("Supprimer <b>'"+msg+"'</b> ?");
+					 $( "#dialog-confirm" ).dialog({
+						 resizable: false,
+						 height:200,
+						 width:600,
+						 modal: true,
+						 buttons: {
+						 "Confirmer": function() {
+							 $( this ).dialog( "close" );
+							 	document.location.href=route;
+							 },
+						 	"Annuler": function() {
+						 		$( this ).dialog( "close" );
+						 	}
+						 }
+					});
+				};
+			</script>
+			
+			
+        	<div id="dialog-confirm" title="Supression" style="display: none;font-size:12px;">
+				<p>
+					<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+					<label id="msg-alert"></label>					
+				</p>
+			</div>
+		    
+        {% endblock %}
+        
+        
+        
+        
+    </body>
+</html>

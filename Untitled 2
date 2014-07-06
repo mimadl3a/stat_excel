@@ -1,0 +1,25 @@
+$data = new Data();
+	    	$data->setLibelleEtab($reader->getRow($i)[2]);
+	    	$data->setClassification($reader->getRow($i)[4]);
+	    	$data->setLibelleSexe($reader->getRow($i)[9]);
+	    
+	    	$data->setLibSituation($reader->getRow($i)[12]);
+	    	$data->setTypeContrat($reader->getRow($i)[14]);
+	    	$data->setRecrutement($reader->getRow($i)[53]);
+	    	$data->setCategorie($reader->getRow($i)[55]);
+	    	$data->setTypeContrat2($reader->getRow($i)[56]);
+	    
+	    
+	    	$d1 = new \DateTime($reader->getRow($i)[11]);
+	    	$d2 = new \DateTime($reader->getRow($i)[54]);
+	    	$d3 = new \DateTime($reader->getRow($i)[18]);
+	    	$d4 = new \DateTime($reader->getRow($i)[13]);
+	    
+	    	$data->setDateEntree(new \DateTime($d1->format("Y-m-d")));
+	    	$data->setDate(new \DateTime($d2->format("Y-m-d")));
+	    	$data->setDateNaissance(new \DateTime($d3->format("Y-m-d")));
+	    	$data->setDateEntreeSituation(new \DateTime($d4->format("Y-m-d")));
+	    
+	    
+	    	$em->persist($data);
+	    	$em->flush();

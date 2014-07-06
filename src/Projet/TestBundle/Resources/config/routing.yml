@@ -1,0 +1,15 @@
+p_homepage:
+    pattern:  /hello/{valide}
+    defaults: { _controller: PBundle:Default:index, valide:0 }
+
+    
+p_ajax:
+    pattern:  /ajax
+    defaults: { _controller: PBundle:Default:ajaxData }
+        
+    
+p_stats_hf_nbr:
+    pattern:  /stats/hf_nbr
+    defaults: { _controller: PBundle:stats:hf_nbr }
+        
+    

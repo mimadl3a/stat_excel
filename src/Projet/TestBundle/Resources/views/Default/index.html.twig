@@ -1,0 +1,104 @@
+{% extends 'PBundle:Layout:sb-admin.html.twig' %} {% block body %} {{
+parent() }}
+<div class="container-fluid col-sm-11 col-sm-offset-1">
+	<div class="row">
+		<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+			<br> {% for flashMessage in app.session.flashbag.get('erreur') %}
+			<div class="alert bg-info">
+				<strong>{{ flashMessage|raw }}</strong>
+			</div>
+			{% endfor %}
+			<div class="progress progress-striped active">
+				<div class="progress-bar" style="font-size: 16px; font-weight: bold"
+					role="progressbar" aria-valuenow="0" aria-valuemin="0"
+					aria-valuemax="100"></div>
+			</div>
+			<div id="msg"></div>
+
+
+
+			<form action="{{ path('p_homepage') }}" method="post"  {{ form_enctype(form) }} class="form">
+				<div class="form-group">
+					<div class="control-group">
+						<label class="col-sm-3 control-label" for="inputText">{{
+							form_label(form.file, "Entrez un fichier .csv: ") }}</label>
+						<div class="col-sm-6">{{
+							form_widget(form.file,{'attr':{'class':'col-lg-8'}}) }}</div>
+						<p class="help-block col-sm-8 col-sm-offset-3">Le fichier doit etre sous le format CSV.</p>
+					</div>
+
+				</div>
+				<div class="form-group">
+					<div class="col-sm-10">
+						<input type="submit" class="btn btn-success" id="btn-submit" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-10">
+						&nbsp;
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<div class="col-sm-10">						
+						<input type="button" class="btn btn-primary" value="Commencer le traitement." id="btn">
+						<img src="{{ asset('images/loading.gif') }}" id="progBar" style="display: none" />
+					</div>
+				</div>
+				{{ form_errors(form) }}
+				{{ form_rest(form) }}
+			</form>
+
+
+
+
+			<script type="text/javascript">
+		$("#btn").prop('disabled', true);
+
+		{% if app.request.get('valide') == 1 %}
+			$("#btn").prop('disabled', false);
+			$("#btn-submit").prop('disabled', true);
+			$("#btn").val("Commencer le traitement.");
+		{% endif %}
+
+		
+		$("#btn").click(function(){
+			$("#btn").prop('disabled', true);
+			$("#btn-submit").prop('disabled', true);
+			$("#btn").val("Traitement en cours ...");
+			$("#progBar").show();
+			$.ajax({
+				xhr: function(){
+				    	var xhr = new window.XMLHttpRequest();
+				    	xhr.addEventListener("progress", function(){
+					    	data = xhr.response.split(" -");
+					    	a = data.length;
+					    	valeur = data[a-2];
+					    	//$("#msg").html(data);
+				    		$(".progress-bar").attr('aria-valuenow', data[a-2]);
+				    		$(".progress-bar").css("width", valeur+"%");
+				    		$(".progress-bar").html(valeur+"%");
+					}, false);
+					return xhr;
+				},
+				type: "POST",
+				url: "{{ path('p_ajax') }}",
+				success: function(data){
+					//alert(data);
+					//$("#msg").html(data);
+					//$("#btn").prop('disabled', false);
+					//$("#btn-submit").prop('disabled', false);
+					//$("#btn").val("Commencer le traitement.");
+					$("#progBar").hide();
+					document.location.href = "{{ path('p_homepage') }}";
+				},
+				dataType: "html"
+			});
+		});
+		$(".alert").delay(60000).toggle( "blind" );
+	</script>
+		</div>
+	</div>
+</div>
+{% endblock %}

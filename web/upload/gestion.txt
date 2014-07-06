@@ -1,0 +1,80 @@
+public function gestionAction($id, Request $req){
+		$em = $this->getDoctrine()->getManager();
+		
+		$repo_part = $em->getRepository("DataRhBundle:Partenaire");
+		$repo_profil = $em->getRepository("DataRhBundle:Profil");
+		$repo_dprt = $em->getRepository("DataRhBundle:DetailPartenaire");
+
+		$countM = 0;
+		$countC = 0;
+		$count = 0;
+			
+		$liste = $repo_part->findAll();
+		$liste_checked_part = $repo_dprt->findAll();
+		
+		if($req->isMethod("POST")){
+			$data = $req->request->all();
+			if($data["cat"] == "Partenaire"){
+				$profil = $repo_profil->find($id);
+				
+
+				if(isset($data['checkc'])){
+					$countC = count($data['checkc']);
+				}
+				if(isset($data['checkm'])){
+					$countM = count($data['checkm']);
+				}
+				
+				if($countC > $countM){
+					$count = $countC;
+				}else{
+					$count = $countM;
+				}
+				
+				for($i = 0 ; $i < $count ; $i++){
+					$id_part = "";
+					$consult = 0;
+					$modif = 0;
+					$detailPart = new DetailPartenaire();
+					
+					
+					
+					if(isset($data['checkc']) and isset($data['checkc'][$i])){
+						$consult = 1;
+						//$detailPart->setConsult(1);
+						$id_part = $data['checkc'][$i];
+					}
+					if(isset($data['checkm']) and isset($data['checkm'][$i])){
+						$modif = 1;
+						//$detailPart->setModif(1);
+						$id_part = $data['checkm'][$i];
+					}
+					
+					$tmp = $repo_dprt->findOneBy(
+						array(
+							"profil" => $id,
+							"partenaire" => $id_part
+						)
+					);
+					
+					if($tmp){
+						$detailPart = $tmp;
+					}
+					
+					$detailPart->setConsult($consult);
+					$detailPart->setModif($modif);
+					
+					$part = $repo_part->find($id_part);
+					$detailPart->setProfil($profil);
+					$detailPart->setPartenaire($part);
+					$em->persist($detailPart);
+					$em->flush();
+					
+					$consult = 0;
+					$modif = 0;
+				}//END IF PARTENAIRE
+				
+			}//END IF POST
+			
+			
+		}

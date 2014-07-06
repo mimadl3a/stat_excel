@@ -1,0 +1,39 @@
+{% extends "DataRhBundle:Layout:sb-admin.html.twig" %} 
+
+		{% block signin %}
+			{{ parent() }}
+        {% endblock %}
+
+{% block body %}
+<div class="container">
+	{# S'il y a une erreur, on l'affiche dans un joli cadre #} {% if error
+	%}
+	<div class="alert bg-danger">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		<strong>{% if error.message %} Informations incorrectes ou compte inactif. {% endif %}</strong>
+	</div>
+	{% endif %}
+</div>
+
+<div class="container" align="center">
+	<br>
+	<form action="{{ path('login_check') }}" method="post" class="form-signin" role="form" style="width:300px">
+		
+        <h2 class="form-signin-heading">Veuillez s'il vous plait vous authentifier</h2>
+        <input type="username" class="form-control" placeholder="Username" value="{{ last_username }}" 
+        name="_username" id="username" required autofocus>
+        <br>
+        <input class="form-control" type="password" id="password" name="_password" 
+						required="true" placeholder="Password" />
+        <label>
+          <input type="checkbox" id="remember_me" name="_remember_me" checked /> Se souvenir de moi
+        </label>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Valider</button>
+        <input type="hidden" name="_csrf_token"	value="{{ csrf_token('authenticate') }}">
+      </form>
+
+    </div>
+
+
+
+{% endblock %}
