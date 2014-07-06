@@ -19,31 +19,30 @@ class statsController extends Controller
     	
     	$em = $this->getDoctrine()->getManager();
     	
-    	$sDateBirth = "1985-10-29";
+    	/*$sDateBirth = "1985-10-29";
     	
     	$oDateNow = new \DateTime();
     	$oDateBirth = new \DateTime($sDateBirth);
     	$oDateIntervall = $oDateNow->diff($oDateBirth);
-    	//echo $oDateIntervall->y;
+    	echo $oDateIntervall->y;*/
     	
     	
-    	
+
     	//DATA STATS POUR PYRAMIDE DES AGES
     	$ages = array(
-	    			'0 and 4','5 and 9','10 and 14','15 and 19','20 and 24','25 and 29','30 and 34',
-	    			'35 and 39','40 and 44','45 and 49','50 and 54','55 and 59','60 and 64','64 and 69',
-	    			'70 and 74','75 and 79','80 and 84','85 and 89','90 and 94','95 and 200'
+    			'0 and 4','5 and 9','10 and 14','15 and 19','20 and 24','25 and 29','30 and 34',
+    			'35 and 39','40 and 44','45 and 49','50 and 54','55 and 59','60 and 64','64 and 69',
+    			'70 and 74','75 and 79','80 and 84','85 and 99'
     	);
-    	
-    	
+    	 
+    	 
     	$data_age_jason = "[";
     	$data_age_jason .= "['Age', 'Femme', 'Homme' ],";
-    	
+    	 
     	foreach ($ages as $age){
     		$rsm = new ResultSetMappingBuilder($em);
     		$rsm->addScalarResult('nbr', 'count');
-    		
-
+    	
     		$data_age_f = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE age between ".$age
     				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
@@ -52,19 +51,63 @@ class statsController extends Controller
     				." WHERE age between ".$age
     				." AND d.libelleSexe = 'Masculin'"
     				, $rsm)->getResult();
-    		    		
-    		//echo var_dump($data_age_h);
+    	
     		
-    		$data_age_jason .= "['".str_replace(' and ', "-", $age)." ans', ".$data_age_f[0]['count'].", -".$data_age_h[0]['count']."],";
+    		if($age == "85 and 99"){
+    			$data_age_jason .= "['+85 ans', ".$data_age_f[0]['count'].", -".$data_age_h[0]['count']."],";
+    		}else{
+    			$data_age_jason .= "['".str_replace(' and ', "-", $age)." ans', ".$data_age_f[0]['count'].", -".$data_age_h[0]['count']."],";
+    		}
     		
+    	
     	}
-
+    	
     	$data_age_jason .= "]";
+    	 
+    	 
+    	 
+    	 
+
+    	//DATA STATS PAR ANCIENTE
+    	$nbr_annees = array(
+    			'0 and 2','2 and 5','5 and 12','12 and 20','20 and 25','25 and 200'
+    	);
+    	 
+    	 
+    	$data_an_jason = "[";
+    	$data_an_jason .= "['Ancien', 'Femme', 'Homme' ],";
+    	 
+    	foreach ($nbr_annees as $nbr_annee){
+    		$rsm = new ResultSetMappingBuilder($em);
+    		$rsm->addScalarResult('nbr', 'count');
     	
+    		$data_an_f = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
+    				." WHERE round(DATEDIFF(CURDATE(),dateEntree)/360) between ".$nbr_annee
+    				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
+    				, $rsm)->getResult();
+    		$data_an_h = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
+    				." WHERE round(DATEDIFF(CURDATE(),dateEntree)/360) between ".$nbr_annee
+    				." AND d.libelleSexe = 'Masculin'"
+    				, $rsm)->getResult();
     	
+    		if($nbr_annee == "25 and 200"){
+    			$data_an_jason .= "['+25 ans', ".$data_an_f[0]['count'].", -"
+    					.$data_an_h[0]['count']."],";
+    		}else{
+    			$data_an_jason .= "['".str_replace(' and ', "-", $nbr_annee)
+    			." ans', ".$data_an_f[0]['count'].", -"
+    					.$data_an_h[0]['count']."],";
+    		}
+    		
     	
+    	}
     	
-    	
+    	$data_an_jason .= "]";
+    	 
+    	 
+    	 
+    	 
+    	 
     	
     	
     	
@@ -166,7 +209,8 @@ class statsController extends Controller
 				"couleur1" => $col1,
         		"stats_cat" => $data_cat_jason,
 				"couleur2" => $col2,
-				"stats_age" => $data_age_jason
+				"stats_age" => $data_age_jason,
+				"stats_an" => $data_an_jason
         	)
 		);
     }
