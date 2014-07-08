@@ -218,7 +218,6 @@ class statsController extends Controller
 	public function par_dateAction(Request $req){
 		$em = $this->getDoctrine()->getManager();
 		
-		//DATA POUR NOMBRE DE FEMMES ET HOMMES EMBOUCHES PAR MOIS DONNEE
 		
 		$date = date("Y-m");
 		if($req->get('startDate'))$date = $req->get('startDate');
@@ -239,6 +238,7 @@ class statsController extends Controller
 			
 		}
 		
+		//DATA POUR NOMBRE DE FEMMES ET HOMMES EMBOUCHES PAR MOIS DONNEE
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('nbr', 'count');
 		$rsm->addScalarResult('libelle', 'd.libelleSexe');
@@ -279,12 +279,79 @@ class statsController extends Controller
 		}
 		
 		$data_all_jason .= "]";
+		//END----------------------------------------------------------------------
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
+		//DATA POUR NOMBRE EMBOUCHES PAR CAT PAR MOIS DONNEE
+		
+		
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$rsm->addScalarResult('classification', 'd.classification');
+		
+		$data_allt_jason = "";
+		
+		
+		$datas = $em->createNativeQuery("SELECT count(d.id) as nbr, d.classification as classification"
+				." FROM data d"
+				." GROUP BY d.classification"
+				, $rsm)->getResult();
+		
+		
+		$data_allt_jason .= "[";
+		foreach ($datas as $data){
+			$data_allt_jason .= "{y: '".$data['d.classification']."', nbr: ".$data['count']."},";
+		}
+		
+		
+		$data_allt_jason .= "]";
+		//END----------------------------------------------------------------------
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		
 		
 		return $this->render('PBundle:Stats:par_date.html.twig',
 			array(
 				"stats" => $data_all_jason,
+				"stats_cat" => $data_allt_jason,
 				"date" => $date
 			)
 		);

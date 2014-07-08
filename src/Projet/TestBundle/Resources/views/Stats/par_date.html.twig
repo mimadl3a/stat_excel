@@ -44,6 +44,24 @@ parent() }}
 					
 					</div>
 				</div>
+				
+				<div class="col-lg-12">
+				<br>
+					<div class="control-group">
+						<div class="panel panel-primary">
+							<div class="panel-heading">
+								<h3 class="panel-title">
+									<i class="fa fa-bar-chart-o"></i> 
+									Nombre d'embouch&eacute;s par cat&eacute;gorie</b>
+								</h3>
+							</div>
+							<div class="panel-body">
+								<div id="morris-line-chart-cat"></div>
+							</div>
+						</div>
+					
+					</div>
+				</div>
 			</div>
 		</form>
 
@@ -119,6 +137,17 @@ parent() }}
 		        ykeys: ['a', 'b'],
 		        labels: ['Hommes', 'Femmes'],
 		        hideHover: 'auto',
+		        resize: true
+			});
+		window.b = Morris.Bar({
+	        element: 'morris-line-chart-cat',
+		        data: {{ stats_cat|raw }},
+		        xkey: 'y',
+		        ykeys: ['nbr'],
+		        labels: ['Nombre'],
+		        hideHover: 'auto',
+		        barRatio: 0.4,
+		        xLabelAngle: 35,
 		        resize: true
 			});
 	}
