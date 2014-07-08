@@ -98,7 +98,7 @@ class DefaultController extends Controller
     					."date,categorie,typeContrat2) values(".
     					"'".$tab[2]."',"
     					."'".$tab[4]."',"
-    					."'".$tab[9]."',"
+    					."'".utf8_encode($tab[9])."',"
     					."'".$date1."',"
     					."'".$tab[12]."',"
     					."'".$date2."',"
@@ -110,6 +110,7 @@ class DefaultController extends Controller
     					."'".$tab[55]."',"
     					."'".$tab[56]."'"
     					.")";
+    			
     			$stmt = $em->getConnection()->prepare($query);
     			$stmt->execute();
     			

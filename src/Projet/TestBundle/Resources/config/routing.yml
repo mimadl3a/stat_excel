@@ -13,3 +13,9 @@ p_stats_hf_nbr:
     defaults: { _controller: PBundle:stats:hf_nbr }
         
     
+    
+p_stats_date:
+    pattern:  /stats/par_date
+    defaults: { _controller: PBundle:stats:par_date }
+        
+    

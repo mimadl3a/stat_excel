@@ -51,8 +51,9 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse navbar-ex1-collapse">
           <ul class="nav navbar-nav side-nav">
-            <li {% if "p_homepage" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_homepage') }}"><span class="glyphicon glyphicon-upload"></span> Transfer de donn&eacute;es</a></li>
-            <li {% if "p_stats_hf_nbr" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_stats_hf_nbr') }}"><span class="glyphicon glyphicon-adjust"></span> Calculs</a></li>
+            <li {% if "p_homepage" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_homepage') }}"><span class="glyphicon glyphicon-upload"></span> Transfert de donn&eacute;es</a></li>
+            <li {% if "p_stats_hf_nbr" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_stats_hf_nbr') }}"><span class="glyphicon glyphicon-adjust"></span> Calculs normaux</a></li>
+            <li {% if "p_stats_date" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_stats_date') }}"><span class="glyphicon glyphicon-adjust"></span> Calculs par date</a></li>
            
           </ul>
 
@@ -134,136 +135,9 @@
       </nav>
         {% endblock %}
         
-        {% block javascript %}
-        	
-		    
-			
-		    
-		    
-		    <script>
-				$(document).ready(function(){
-					$(function(){
-						$("#liste_cat").tablesorter();
-						$("#liste_cgv").tablesorter();
-						$("#liste_prd").tablesorter();
-					});
-				});
-				
-				$( "#liste-region" ).change(function() {
-					$('#liste-ville').prop('disabled', true);
-					$('#data_codepostale').prop('disabled', true);
-					$('#btn-submit').prop('disabled', true);
-					$("#progBar").show();
-					$.ajax({
-						type: "POST",
-						url: "",
-						data: { region: $( "#liste-region" ).val() },
-						success: function(data){
-							//alert(data);
-							$('#liste-ville').prop('disabled', false);
-							$( "#liste-ville" ).html(data);
-							$("#progBar").hide();
-						},
-						dataType: "html"
-					});
-				});
-
-
-				
-				$( "#liste-ville" ).change(function() {
-					$("#progBar").show();
-					$('#data_codepostale').prop('disabled', true);
-					$.ajax({
-						type: "POST",
-						url: "",
-						data: { ville: $( "#liste-ville" ).val() },
-						success: function(data){
-							//alert(data);
-							$('#data_codepostale').prop('disabled', false);
-							$('#btn-submit').prop('disabled', false);
-							$( "#data_codepostale" ).html(data);
-							$("#progBar").hide();
-						},
-						dataType: "html"
-					});
-				});
-
-				
-
-
-
-
-
-				
-				$( "#search-cat" ).keyup(function() {
-					$("#progBar").show();
-					$.ajax({
-						type: "POST",
-						url: "",
-						data: { variable: $( "#search-cat" ).val(), page:'1' },
-						success: function(data){
-							$("#progBar").hide();
-							$( "#contenu-cat" ).html( data );
-							$("#liste_cat").tablesorter();
-							$( "#search-cat" ).blur();
-						},
-						dataType: "html"
-					});
-				});
-
-
-				function liste_cat(page){
-					$("#progBar").show();
-					$.ajax({
-						type: "POST",
-						url: "",
-						data: { variable: $( "#search-cat" ).val(), page:page },
-						success: function(data){
-							$("#progBar").hide();
-							$( "#contenu-cat" ).html( data );
-							$("#liste_cat").tablesorter();
-							$( "#search-cat" ).blur();
-						},
-						dataType: "html"
-					});
-				}
-
-				$( "#search-cgv" ).keyup(function() {
-					$.ajax({
-						type: "POST",
-						url: "",
-						data: { variable: $( "#search-cgv" ).val() },
-						success: function(data){
-							$( "#contenu-cgv" ).html( data );
-							$("#liste_cgv").tablesorter();
-							$( "#search-cgv" ).blur();
-						},
-						dataType: "html"
-					});
-				});
-
-				
-				
+        {% block javascript %}		    
+		    <script>		
 				$(".alert").delay(6000).toggle( "blind" );
-
-				 function spr(route, msg) {
-					 $("#msg-alert").html("Supprimer <b>'"+msg+"'</b> ?");
-					 $( "#dialog-confirm" ).dialog({
-						 resizable: false,
-						 height:200,
-						 width:600,
-						 modal: true,
-						 buttons: {
-						 "Confirmer": function() {
-							 $( this ).dialog( "close" );
-							 	document.location.href=route;
-							 },
-						 	"Annuler": function() {
-						 		$( this ).dialog( "close" );
-						 	}
-						 }
-					});
-				};
 			</script>
 			
 			

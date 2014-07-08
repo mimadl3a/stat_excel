@@ -198,7 +198,7 @@ class statsController extends Controller
     	
     	
     	 
-    	 
+		//SELECT LAST_DAY(CURRENT_DATE)
     	 
     	
         return $this->render('PBundle:Stats:hf_nbr.html.twig',
@@ -214,4 +214,79 @@ class statsController extends Controller
         	)
 		);
     }
+
+	public function par_dateAction(Request $req){
+		$em = $this->getDoctrine()->getManager();
+		
+		//DATA POUR NOMBRE DE FEMMES ET HOMMES EMBOUCHES PAR MOIS DONNEE
+		
+		$date = date("Y-m");
+		if($req->get('startDate'))$date = $req->get('startDate');
+		
+		
+		
+		$d = explode("-", $date);
+		$num = cal_days_in_month(CAL_GREGORIAN, $d[1], $d[0]);
+		
+		$tab = array();
+		
+		for ($i = 1 ;$i <= $num; $i++){
+			if($i<10){
+				$tab[$i] = array($date."-0".$i, 0, 0);
+			}else{
+				$tab[$i] = array($date."-".$i, 0, 0);
+			}
+			
+		}
+		
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$rsm->addScalarResult('libelle', 'd.libelleSexe');
+		$rsm->addScalarResult('dt', 'd.dateEntree');
+		
+		$data_all_jason = "";
+
+		$data_f = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle, d.dateEntree as dt FROM data d"
+				." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
+				." AND d.dateEntree like '".$date."-%'"
+				." GROUP BY d.dateEntree"
+				, $rsm)->getResult();
+		
+		$data_h = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle, d.dateEntree as dt FROM data d"
+				." WHERE d.libelleSexe = 'Masculin'"
+				." AND d.dateEntree like '".$date."-%'"
+				." GROUP BY d.dateEntree"
+				, $rsm)->getResult();
+		
+						
+		$data_all_jason .= "[";
+		foreach ($data_h as $data){
+			for ($i = 1 ;$i <= $num; $i++){
+				if($tab[$i][0] == $data['d.dateEntree']){
+					$tab[$i][1] = $data['count'];
+				}
+			}
+		}
+		foreach ($data_f as $data){
+			for ($i = 1 ;$i <= $num; $i++){
+				if($tab[$i][0] == $data['d.dateEntree']){
+					$tab[$i][2] = $data['count'];
+				}
+			}
+		}
+		for ($i = 1 ;$i <= $num; $i++){
+			$data_all_jason .= "{y: '".$tab[$i][0]."', a: ".$tab[$i][1].", b:".$tab[$i][2]."},";
+		}
+		
+		$data_all_jason .= "]";
+		
+		
+		
+		return $this->render('PBundle:Stats:par_date.html.twig',
+			array(
+				"stats" => $data_all_jason,
+				"date" => $date
+			)
+		);
+	}
 }
