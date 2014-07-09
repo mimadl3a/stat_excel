@@ -184,20 +184,20 @@ class statsController extends Controller
     	
     	$rsm = new ResultSetMappingBuilder($em);
     	$rsm->addScalarResult('nbr', 'count');
-    	$rsm->addScalarResult('cat', 'd.categorie');
+    	$rsm->addScalarResult('cat', 'd.classification');
     	
     	$data_cat_jason = "";
     	
-    	$data_cat = $em->createNativeQuery("SELECT count(d.id) as nbr, d.categorie as cat FROM data d"
+    	$data_cat = $em->createNativeQuery("SELECT count(d.id) as nbr, d.classification as cat FROM data d"
     			." WHERE d.libSituation = 'Actif'"
-    			." GROUP BY d.categorie"
+    			." GROUP BY d.classification"
     			, $rsm)->getResult();
     	
     	$data_cat_jason .= "[";
     	$o2 = 0;
     	$col2 ="";
     	foreach ($data_cat as $data){
-    		$data_cat_jason .= "{value: ".$data['count'].", label: '".$data['d.categorie']."'},";
+    		$data_cat_jason .= "{value: ".$data['count'].", label: '".$data['d.classification']."'},";
     		$col2 .= "'".$background_colors2[$o2]."',";
     		$o2++;
     	}
