@@ -46,10 +46,12 @@ class statsController extends Controller
     		$data_age_f = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE age between ".$age
     				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
+    				." AND d.libSituation = 'Actif'"
     				, $rsm)->getResult();
     		$data_age_h = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE age between ".$age
     				." AND d.libelleSexe = 'Masculin'"
+    				." AND d.libSituation = 'Actif'"
     				, $rsm)->getResult();
     	
     		
@@ -84,10 +86,12 @@ class statsController extends Controller
     		$data_an_f = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE round(DATEDIFF(CURDATE(),dateEntree)/360) between ".$nbr_annee
     				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
+    				." AND d.libSituation = 'Actif'"
     				, $rsm)->getResult();
     		$data_an_h = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE round(DATEDIFF(CURDATE(),dateEntree)/360) between ".$nbr_annee
     				." AND d.libelleSexe = 'Masculin'"
+    				." AND d.libSituation = 'Actif'"
     				, $rsm)->getResult();
     	
     		if($nbr_annee == "25 and 200"){
@@ -126,6 +130,7 @@ class statsController extends Controller
     	$data_st_jason = "";
     	 
     	$data_st = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle FROM data d"
+    			." WHERE d.libSituation = 'Actif'"
     			." GROUP BY d.libelleSexe"
     			, $rsm)->getResult();
     	 
@@ -153,6 +158,7 @@ class statsController extends Controller
     	$data_sty_jason = "";
     	
     	$data_sty = $em->createNativeQuery("SELECT count(d.id) as nbr, d.typeContrat as typec FROM data d"
+    			." WHERE d.libSituation = 'Actif'"
     			." GROUP BY d.typeContrat"
     			, $rsm)->getResult();
     	
@@ -183,6 +189,7 @@ class statsController extends Controller
     	$data_cat_jason = "";
     	
     	$data_cat = $em->createNativeQuery("SELECT count(d.id) as nbr, d.categorie as cat FROM data d"
+    			." WHERE d.libSituation = 'Actif'"
     			." GROUP BY d.categorie"
     			, $rsm)->getResult();
     	
@@ -302,25 +309,58 @@ class statsController extends Controller
 		
 
 		//DATA POUR NOMBRE EMBOUCHES PAR CAT PAR MOIS DONNEE
-		
-		
+		$tab1 = array();
+		$catstab = array("","");
+		$cats_libelle = array();
+		$o = 0;
+
 		$rsm = new ResultSetMappingBuilder($em);
-		$rsm->addScalarResult('nbr', 'count');
 		$rsm->addScalarResult('classification', 'd.classification');
-		
-		$data_allt_jason = "";
-		
-		
-		$datas = $em->createNativeQuery("SELECT count(d.id) as nbr, d.classification as classification"
+		$cats = $em->createNativeQuery("SELECT d.classification"
 				." FROM data d"
 				." GROUP BY d.classification"
+				." ORDER BY d.classification DESC"
 				, $rsm)->getResult();
-		
-		
-		$data_allt_jason .= "[";
-		foreach ($datas as $data){
-			$data_allt_jason .= "{y: '".$data['d.classification']."', nbr: ".$data['count']."},";
+		$cats_json = "[";
+		foreach ($cats as $c){
+			$catstab[$o] = "";
+			$cats_libelle[$o] = $c;
+			$o++;
+			$cats_json .= "'".$c['d.classification']."',";
 		}
+		$cats_json .= "]";
+		
+		for ($i = 1 ;$i <= $num; $i++){
+			if($i<10){
+				$t = range(0, count($catstab));
+				$t[0] = $date."-0".$i;
+				$tab1[$i] = $t;
+			}else{
+				$t = range(0, count($catstab));
+				$t[0] = $date."-".$i;
+				$tab1[$i] = $t;
+			}				
+		}
+		
+		$data_allt_jason = "[";
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		for ($i = 1 ;$i <= $num; $i++){
+			$data_allt_jason .= "{y: '".$tab1[$i][0]."',";
+			for($j = 0 ;$j < count($tab1[$i])-1; $j++){
+				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.classification as classification"
+					." FROM data d"
+					." WHERE d.dateEntree = '".$tab1[$i][0]."'"
+					." AND d.classification = '".$cats_libelle[$j]['d.classification']."'"
+					, $rsm)->getResult();
+				
+				
+				$tab1[$i][$j+1] = $datas[0]['count'];
+				$data_allt_jason .= $cats_libelle[$j]['d.classification'].": ".$datas[0]['count'].",";
+			}
+			$data_allt_jason .= "},";
+		}
+		
 		
 		
 		$data_allt_jason .= "]";
@@ -352,6 +392,7 @@ class statsController extends Controller
 			array(
 				"stats" => $data_all_jason,
 				"stats_cat" => $data_allt_jason,
+				"cats" => $cats_json,
 				"date" => $date
 			)
 		);

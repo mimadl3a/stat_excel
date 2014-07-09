@@ -137,29 +137,34 @@ parent() }}
 		        ykeys: ['a', 'b'],
 		        labels: ['Hommes', 'Femmes'],
 		        hideHover: 'auto',
-		        resize: true
+		        resize: true,
+		        smooth: false
 			});
-		window.b = Morris.Bar({
+
+		window.b = Morris.Line({
 	        element: 'morris-line-chart-cat',
 		        data: {{ stats_cat|raw }},
 		        xkey: 'y',
-		        ykeys: ['nbr'],
-		        labels: ['Nombre'],
+		        ykeys: {{ cats|raw }},
+		        labels: {{ cats|raw }},
 		        hideHover: 'auto',
-		        barRatio: 0.4,
-		        xLabelAngle: 35,
-		        resize: true
+		        resize: true,
+		        smooth: false
 			});
+		
 	}
 	$(document).ready(function() {
 		stats();
 		var StatsResize1;
+		var StatsResize2;
 		
 	    $(window).resize(function(event){
 	    	event.preventDefault();
 
 	    	clearTimeout(StatsResize1);
 	    	StatsResize1 = setTimeout(window.a.redraw(), 1000);
+	    	clearTimeout(StatsResize2);
+	    	StatsResize2 = setTimeout(window.b.redraw(), 1000);
 	    });
 	});
 	</script>
