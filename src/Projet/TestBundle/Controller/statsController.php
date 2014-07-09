@@ -373,6 +373,66 @@ class statsController extends Controller
 		
 		
 		
+
+
+		//DATA POUR NOMBRE EMBOUCHES PAR TYPE DE CONTRAT(CDI, CDD) PAR MOIS DONNEE
+		$tab2 = array();
+		$typetab = array("","");
+		$types_libelle = array();
+		$o = 0;
+		
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('typeContrat', 'd.typeContrat');
+		$types = $em->createNativeQuery("SELECT d.typeContrat"
+				." FROM data d"
+				." GROUP BY d.typeContrat"
+				." ORDER BY d.typeContrat DESC"
+				, $rsm)->getResult();
+		$types_json = "[";
+		foreach ($types as $c){
+			$typetab[$o] = "";
+			$types_libelle[$o] = $c;
+			$o++;
+			$types_json .= "'".$c['d.typeContrat']."',";
+		}
+		$types_json .= "]";
+		
+		for ($i = 1 ;$i <= $num; $i++){
+			if($i<10){
+				$t = range(0, count($typetab));
+				$t[0] = $date."-0".$i;
+				$tab1[$i] = $t;
+			}else{
+				$t = range(0, count($typetab));
+				$t[0] = $date."-".$i;
+				$tab1[$i] = $t;
+			}
+		}
+		
+		$data_alltype_jason = "[";
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		for ($i = 1 ;$i <= $num; $i++){
+			$data_alltype_jason .= "{y: '".$tab1[$i][0]."',";
+			for($j = 0 ;$j < count($tab1[$i])-1; $j++){
+				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.typeContrat as typeContrat"
+						." FROM data d"
+						." WHERE d.dateEntree = '".$tab1[$i][0]."'"
+						." AND d.typeContrat = '".$types_libelle[$j]['d.typeContrat']."'"
+						, $rsm)->getResult();
+		
+		
+				$tab1[$i][$j+1] = $datas[0]['count'];
+				$data_alltype_jason .= $types_libelle[$j]['d.typeContrat'].": ".$datas[0]['count'].",";
+			}
+			$data_alltype_jason .= "},";
+		}
+		
+		
+		
+		$data_alltype_jason .= "]";
+		//END----------------------------------------------------------------------
+		
 		
 		
 		
@@ -393,6 +453,8 @@ class statsController extends Controller
 				"stats" => $data_all_jason,
 				"stats_cat" => $data_allt_jason,
 				"cats" => $cats_json,
+				"stats_types" => $data_alltype_jason,
+				"types" => $types_json,
 				"date" => $date
 			)
 		);
