@@ -10,6 +10,29 @@ parent() }}
 			</div>
 			{% endfor %}
 
+			
+			
+			<div class="col-md-12">
+				<div class="col-md-2">
+					Sites: 
+				</div>
+				<div class="col-md-8">
+					<form method="post" action="{{ path('p_stats_hf_nbr') }}">
+						<div class="col-md-6">
+							<select name="site" class="form-control">
+								<option>Tous</option>
+								{% for site in sites %}
+									<option>{{ site['d.libelleEtab'] }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="col-md-2">
+							<input type="submit" class="btn btn-primary">
+						</div>
+					</form>
+				<br><br>
+				</div>				
+			</div>
 			<div class="col-lg-12">
 
 				<div class="panel panel-primary">

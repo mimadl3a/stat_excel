@@ -10,22 +10,32 @@ parent() }}
 			</div>
 			{% endfor %}
 
-
-		<form action="{{ path('p_stats_date') }}" method="post" class="form">
-			<div class="form-group">
-				<div class="col-lg-12">
-					<div class="col-lg-4">
-						<label for="startDate">Date :</label>
-						<input name="startDate"	id="startDate" class="date-picker" />
-					</div>
-					<div class="col-lg-6">
-						<div class="form-group">
-							<div class="col-sm-offset-2 col-sm-10">
-								<input type="submit" value="Valider" class="btn btn-primary" />
-							</div>
-						</div>
-					</div>
+			
+			<div class="col-md-12">
+				<div class="col-md-2">
+					Sites: 
 				</div>
+				<div class="col-md-10">
+					<form method="post" action="{{ path('p_stats_date') }}">
+						<div class="col-md-4">
+							<select name="site" class="form-control">
+								<option>Tous</option>
+								{% for site in sites %}
+									<option>{{ site['d.libelleEtab'] }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="col-lg-4">
+							<input name="startDate"	id="startDate" class="date-picker form-control" placeholder="Date" />
+						</div>
+						<div class="col-md-2">
+							<input type="submit" class="btn btn-primary">
+						</div>
+					</form>
+				<br><br>
+				</div>				
+			</div>
+
 				
 				<div class="col-lg-12">
 				<br>
@@ -81,7 +91,6 @@ parent() }}
 					</div>
 				</div>
 			</div>
-		</form>
 
 
 <style>

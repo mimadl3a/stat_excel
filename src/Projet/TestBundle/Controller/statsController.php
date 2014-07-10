@@ -15,7 +15,7 @@ use Projet\TestBundle\Entity\Document;
 
 class statsController extends Controller
 {
-    public function hf_nbrAction(){
+    public function hf_nbrAction(Request $req){
     	
     	$em = $this->getDoctrine()->getManager();
     	
@@ -27,6 +27,19 @@ class statsController extends Controller
     	echo $oDateIntervall->y;*/
     	
     	
+    	$sites = array();
+    	$rsm = new ResultSetMappingBuilder($em);
+    	$rsm->addScalarResult('libelle', 'd.libelleEtab');
+    	$sites = $em->createNativeQuery("SELECT d.libelleEtab as libelle FROM data d"
+    		." GROUP BY d.libelleEtab"
+    		, $rsm)->getResult();
+    	
+    	
+    	$dataform = $req->request->all();
+    	$st = "";
+    	if(isset($dataform['site']) and $dataform['site'] != "Tous"){
+    		$st = " AND d.libelleEtab='".$dataform['site']."'";
+    	}
 
     	//DATA STATS POUR PYRAMIDE DES AGES
     	$ages = array(
@@ -34,7 +47,7 @@ class statsController extends Controller
     			'35 and 39','40 and 44','45 and 49','50 and 54','55 and 59','60 and 64','64 and 69',
     			'70 and 74','75 and 79','80 and 84','85 and 99'
     	);
-    	 
+    	
     	 
     	$data_age_jason = "[";
     	$data_age_jason .= "['Age', 'Femme', 'Homme' ],";
@@ -46,12 +59,12 @@ class statsController extends Controller
     		$data_age_f = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE age between ".$age
     				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
-    				." AND d.libSituation = 'Actif'"
+    				." AND d.libSituation = 'Actif'".$st
     				, $rsm)->getResult();
     		$data_age_h = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE age between ".$age
     				." AND d.libelleSexe = 'Masculin'"
-    				." AND d.libSituation = 'Actif'"
+    				." AND d.libSituation = 'Actif'".$st
     				, $rsm)->getResult();
     	
     		
@@ -86,12 +99,12 @@ class statsController extends Controller
     		$data_an_f = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE round(DATEDIFF(CURDATE(),dateEntree)/360) between ".$nbr_annee
     				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
-    				." AND d.libSituation = 'Actif'"
+    				." AND d.libSituation = 'Actif'".$st
     				, $rsm)->getResult();
     		$data_an_h = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE round(DATEDIFF(CURDATE(),dateEntree)/360) between ".$nbr_annee
     				." AND d.libelleSexe = 'Masculin'"
-    				." AND d.libSituation = 'Actif'"
+    				." AND d.libSituation = 'Actif'".$st
     				, $rsm)->getResult();
     	
     		if($nbr_annee == "25 and 200"){
@@ -130,7 +143,7 @@ class statsController extends Controller
     	$data_st_jason = "";
     	 
     	$data_st = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle FROM data d"
-    			." WHERE d.libSituation = 'Actif'"
+    			." WHERE d.libSituation = 'Actif'".$st
     			." GROUP BY d.libelleSexe"
     			, $rsm)->getResult();
     	 
@@ -158,7 +171,7 @@ class statsController extends Controller
     	$data_sty_jason = "";
     	
     	$data_sty = $em->createNativeQuery("SELECT count(d.id) as nbr, d.typeContrat as typec FROM data d"
-    			." WHERE d.libSituation = 'Actif'"
+    			." WHERE d.libSituation = 'Actif'".$st
     			." GROUP BY d.typeContrat"
     			, $rsm)->getResult();
     	
@@ -189,7 +202,7 @@ class statsController extends Controller
     	$data_cat_jason = "";
     	
     	$data_cat = $em->createNativeQuery("SELECT count(d.id) as nbr, d.classification as cat FROM data d"
-    			." WHERE d.libSituation = 'Actif'"
+    			." WHERE d.libSituation = 'Actif'".$st
     			." GROUP BY d.classification"
     			, $rsm)->getResult();
     	
@@ -217,7 +230,8 @@ class statsController extends Controller
         		"stats_cat" => $data_cat_jason,
 				"couleur2" => $col2,
 				"stats_age" => $data_age_jason,
-				"stats_an" => $data_an_jason
+				"stats_an" => $data_an_jason,
+				"sites" => $sites
         	)
 		);
     }
@@ -225,6 +239,20 @@ class statsController extends Controller
 	public function par_dateAction(Request $req){
 		$em = $this->getDoctrine()->getManager();
 		
+
+		$sites = array();
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('libelle', 'd.libelleEtab');
+		$sites = $em->createNativeQuery("SELECT d.libelleEtab as libelle FROM data d"
+				." GROUP BY d.libelleEtab"
+				, $rsm)->getResult();
+		 
+		 
+		$dataform = $req->request->all();
+		$st = "";
+		if(isset($dataform['site']) and $dataform['site'] != "Tous"){
+			$st = " AND d.libelleEtab='".$dataform['site']."'";
+		}
 		
 		$date = date("Y-m");
 		if($req->get('startDate'))$date = $req->get('startDate');
@@ -255,13 +283,13 @@ class statsController extends Controller
 
 		$data_f = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle, d.dateEntree as dt FROM data d"
 				." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
-				." AND d.dateEntree like '".$date."-%'"
+				." AND d.dateEntree like '".$date."-%'".$st
 				." GROUP BY d.dateEntree"
 				, $rsm)->getResult();
 		
 		$data_h = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle, d.dateEntree as dt FROM data d"
 				." WHERE d.libelleSexe = 'Masculin'"
-				." AND d.dateEntree like '".$date."-%'"
+				." AND d.dateEntree like '".$date."-%'".$st
 				." GROUP BY d.dateEntree"
 				, $rsm)->getResult();
 		
@@ -317,7 +345,7 @@ class statsController extends Controller
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('classification', 'd.classification');
 		$cats = $em->createNativeQuery("SELECT d.classification"
-				." FROM data d"
+				." FROM data d WHERE 1=1".$st
 				." GROUP BY d.classification"
 				." ORDER BY d.classification DESC"
 				, $rsm)->getResult();
@@ -351,7 +379,7 @@ class statsController extends Controller
 				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.classification as classification"
 					." FROM data d"
 					." WHERE d.dateEntree = '".$tab1[$i][0]."'"
-					." AND d.classification = '".$cats_libelle[$j]['d.classification']."'"
+					." AND d.classification = '".$cats_libelle[$j]['d.classification']."'".$st
 					, $rsm)->getResult();
 				
 				
@@ -384,7 +412,7 @@ class statsController extends Controller
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('typeContrat', 'd.typeContrat');
 		$types = $em->createNativeQuery("SELECT d.typeContrat"
-				." FROM data d"
+				." FROM data d where 1=1".$st
 				." GROUP BY d.typeContrat"
 				." ORDER BY d.typeContrat DESC"
 				, $rsm)->getResult();
@@ -418,7 +446,7 @@ class statsController extends Controller
 				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.typeContrat as typeContrat"
 						." FROM data d"
 						." WHERE d.dateEntree = '".$tab1[$i][0]."'"
-						." AND d.typeContrat = '".$types_libelle[$j]['d.typeContrat']."'"
+						." AND d.typeContrat = '".$types_libelle[$j]['d.typeContrat']."'".$st
 						, $rsm)->getResult();
 		
 		
@@ -455,7 +483,44 @@ class statsController extends Controller
 				"cats" => $cats_json,
 				"stats_types" => $data_alltype_jason,
 				"types" => $types_json,
-				"date" => $date
+				"date" => $date,
+				"sites" => $sites
+			)
+		);
+	}
+
+	public function indicateurAction(){
+		$em = $this->getDoctrine()->getManager();
+		$rsm = new ResultSetMappingBuilder($em);
+		
+		$taux_femme = array();
+		$nbr = 0;
+		
+		$rsm->addScalarResult('nb', 'count');
+		$total = $em->createNativeQuery("select count(*) as nb from data"
+				, $rsm)->getResult();
+		
+		for($i = 1; $i <= date("m"); $i++){
+			$nbr++;
+			$rsm->addScalarResult('nbr_f', 'count');
+			
+			$data_all_jason = "";
+			$a = $i;
+			if($i<10)$a = "0".$i;
+			$data_f = $em->createNativeQuery("SELECT count(*) as nbr_f"
+				." FROM data d"
+				." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
+				." AND d.dateEntree < '2014-".$a."-01'"
+				, $rsm)->getResult();
+			
+			$calcul = round(($data_f[0]['count']*100)/$total[0]['count']);
+			array_push($taux_femme, $calcul." %");
+			
+		}
+		return $this->render("PBundle:Stats:indicateur.html.twig",
+			array(
+				'nbr_mois' => $nbr,
+				'taux_femme' => $taux_femme
 			)
 		);
 	}
