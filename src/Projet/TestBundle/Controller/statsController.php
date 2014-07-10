@@ -491,10 +491,14 @@ class statsController extends Controller
 
 	public function indicateurAction(){
 		$em = $this->getDoctrine()->getManager();
+		$nbr = 0;
+		
+		
 		$rsm = new ResultSetMappingBuilder($em);
 		
+
+		//TAUX DE FEMMES PAR RAPPORT AU HOMME
 		$taux_femme = array();
-		$nbr = 0;
 		
 		$rsm->addScalarResult('nb', 'count');
 		$total = $em->createNativeQuery("select count(*) as nb from data"
@@ -503,24 +507,76 @@ class statsController extends Controller
 		for($i = 1; $i <= date("m"); $i++){
 			$nbr++;
 			$rsm->addScalarResult('nbr_f', 'count');
-			
-			$data_all_jason = "";
+				
 			$a = $i;
 			if($i<10)$a = "0".$i;
 			$data_f = $em->createNativeQuery("SELECT count(*) as nbr_f"
-				." FROM data d"
-				." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
-				." AND d.dateEntree < '2014-".$a."-01'"
-				, $rsm)->getResult();
-			
+					." FROM data d"
+					." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
+					." AND d.dateEntree < '2014-".$a."-01'"
+					, $rsm)->getResult();
+				
 			$calcul = round(($data_f[0]['count']*100)/$total[0]['count']);
 			array_push($taux_femme, $calcul." %");
-			
+				
 		}
+		//----------------------------------
+		
+		
+
+
+		//MOYENNE D'AGE
+		$moyenne = array();
+		
+		for($i = 1; $i <= date("m"); $i++){
+			$rsm->addScalarResult('age', 'd.age');
+				
+			$a = $i;
+			if($i<10)$a = "0".$i;
+			$data_m = $em->createNativeQuery("SELECT SUM(d.age) as age"
+					." FROM data d"
+					." WHERE d.dateEntree < '2014-".$a."-01'"
+					, $rsm)->getResult();
+				
+			$calcul = round($data_m[0]['d.age']/$total[0]['count']);
+			array_push($moyenne, $calcul." ans");
+				
+		}
+		//----------------------------------
+		
+
+
+		//TAUX ANCIEN
+		$taux_anc = array();
+		
+		for($i = 1; $i <= date("m"); $i++){
+			$rsm->addScalarResult('nbr', 'count');
+				
+			$a = $i;
+			if($i<10)$a = "0".$i;
+			$data_m = $em->createNativeQuery("SELECT count(d.id) as nbr"
+					." FROM data d"
+					." WHERE d.dateEntree < '2014-".$a."-01'"
+					." AND round(DATEDIFF(CURDATE(),dateEntree)/360)<5"
+					, $rsm)->getResult();
+				
+			$calcul = $data_m[0]['count']/$total[0]['count'];
+			array_push($taux_anc, $calcul." %");
+				
+		}
+		//----------------------------------
+		
+		
+		
+		
+		
+		
 		return $this->render("PBundle:Stats:indicateur.html.twig",
 			array(
 				'nbr_mois' => $nbr,
-				'taux_femme' => $taux_femme
+				'taux_femme' => $taux_femme,
+				'moyenne' => $moyenne,
+				'taux_anc' => $taux_anc
 			)
 		);
 	}

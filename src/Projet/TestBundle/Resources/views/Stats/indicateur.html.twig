@@ -32,12 +32,28 @@ parent() }}
 					</thead>
 					<tbody>
 						<tr>
-						<td>Taux de repr&eacute;sentativit&eacute; des femmes</td>
-						{% for a in 1..nbr_mois %}						
-							<td>
-								{{ taux_femme[a-1] }}
-							</td>							
-						{% endfor %}
+							<td>Taux de repr&eacute;sentativit&eacute; des femmes</td>
+							{% for a in 1..nbr_mois %}						
+								<td>
+									{{ taux_femme[a-1] }}
+								</td>							
+							{% endfor %}
+						</tr>
+						<tr>
+							<td>Moyenne d'&acirc;ge</td>
+							{% for a in 1..nbr_mois %}						
+								<td>
+									{{ moyenne[a-1] }}
+								</td>							
+							{% endfor %}
+						</tr>
+						<tr>
+							<td>Taux ancient&eacute;</td>
+							{% for a in 1..nbr_mois %}						
+								<td>
+									{{ taux_anc[a-1] }}
+								</td>							
+							{% endfor %}
 						</tr>
 					</tbody>
 				</table>
