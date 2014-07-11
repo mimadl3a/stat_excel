@@ -2,3 +2,13 @@ p:
     resource: "@PBundle/Resources/config/routing.yml"
     prefix:   /
 
+
+login:
+    pattern:   /login
+    defaults:  { _controller: PBundle:Security:login }
+
+login_check:
+    pattern:   /manager/login_check
+
+logout:
+    pattern:   /manager/logout

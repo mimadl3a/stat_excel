@@ -1,30 +1,40 @@
-{% extends "DataRhBundle:Layout:sb-admin.html.twig" %} 
+{% extends "PBundle:Layout:sb-admin.html.twig" %} 
 
 		{% block signin %}
 			{{ parent() }}
         {% endblock %}
 
 {% block body %}
+<style>
+<!--
+	body{
+		background-color:blue;
+	}
+-->
+</style>
 <div class="container">
 	{# S'il y a une erreur, on l'affiche dans un joli cadre #} {% if error
 	%}
 	<div class="alert bg-danger">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
-		<strong>{% if error.message %} Informations incorrectes ou compte inactif. {% endif %}</strong>
+		<strong>
+			{% if error.message %} 
+				Informations incorrectes ou compte inactif. 
+			{% endif %}
+		</strong>
 	</div>
 	{% endif %}
 </div>
 
 <div class="container" align="center">
 	<br>
-	<form action="{{ path('login_check') }}" method="post" class="form-signin" role="form" style="width:300px">
+	<form action="{{ path('login_check') }}" method="post" class="form-signin" role="form" style="width:300px;padding:40px;background-color:#ccc">
 		
-        <h2 class="form-signin-heading">Veuillez s'il vous plait vous authentifier</h2>
         <input type="username" class="form-control" placeholder="Username" value="{{ last_username }}" 
         name="_username" id="username" required autofocus>
         <br>
         <input class="form-control" type="password" id="password" name="_password" 
-						required="true" placeholder="Password" />
+						required="true" placeholder="Password" autocomplete="off" />
         <label>
           <input type="checkbox" id="remember_me" name="_remember_me" checked /> Se souvenir de moi
         </label>

@@ -10,29 +10,51 @@ security:
         in_memory:
             memory:
                 users:
-                    user:  { password: userpass, roles: [ 'ROLE_USER' ] }
-                    admin: { password: adminpass, roles: [ 'ROLE_ADMIN' ] }
+                    naoual: { password: naoualpass, roles: [ 'ROLE_ADMIN' ] }
 
     firewalls:
         dev:
             pattern:  ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        login:
-            pattern:  ^/demo/secured/login$
-            security: false
-
-        secured_area:
-            pattern:    ^/demo/secured/
+        admin:
+            pattern:    ^/manager/*
+            provider: in_memory
             form_login:
-                check_path: _security_check
-                login_path: _demo_login
+                login_path: login
+                check_path: login_check
+                default_target_path: /manager/upload
+                csrf_provider: form.csrf_provider
             logout:
-                path:   _demo_logout
-                target: _demo
-            #anonymous: ~
-            #http_basic:
-            #    realm: "Secured Demo Area"
+                path:   logout
+                target: /login
+            anonymous: true
+            security: true
+            remember_me:
+                key:      "%secret%"
+                lifetime: 7200 # en secondes
+                path:     /
+                domain:   ~
+
+        login:
+            pattern:  ^/login
+            anonymous: true
+        
+
 
     access_control:
-        #- { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: https }
+    
+       # ROLE USER SUPREME: RECHERCHE ET ACCESS CONTROL
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: http }
+        - { path: ^/manager/*, roles: ROLE_ADMIN, requires_channel: http }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        

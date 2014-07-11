@@ -1,26 +1,26 @@
 p_homepage:
-    pattern:  /hello/{valide}
+    pattern:  /manager/upload/{valide}
     defaults: { _controller: PBundle:Default:index, valide:0 }
 
     
 p_ajax:
-    pattern:  /ajax
+    pattern:  /manager/ajax
     defaults: { _controller: PBundle:Default:ajaxData }
         
     
 p_stats_hf_nbr:
-    pattern:  /stats/hf_nbr
+    pattern:  /manager/stats/hf_nbr
     defaults: { _controller: PBundle:stats:hf_nbr }
         
     
     
 p_stats_date:
-    pattern:  /stats/par_date
+    pattern:  /manager/stats/par_date
     defaults: { _controller: PBundle:stats:par_date }
         
     
 indicateur:
-    pattern:  /stats/indicateur
+    pattern:  /manager/stats/indicateur
     defaults: { _controller: PBundle:stats:indicateur }
         
     
