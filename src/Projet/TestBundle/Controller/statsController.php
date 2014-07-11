@@ -254,23 +254,17 @@ class statsController extends Controller
 			$st = " AND d.libelleEtab='".$dataform['site']."'";
 		}
 		
-		$date = date("Y-m");
+		$date = date("Y");
 		if($req->get('startDate'))$date = $req->get('startDate');
-		
-		
-		
-		$d = explode("-", $date);
-		$num = cal_days_in_month(CAL_GREGORIAN, $d[1], $d[0]);
-		
+				
 		$tab = array();
 		
-		for ($i = 1 ;$i <= $num; $i++){
+		for ($i = 1 ;$i <= 12; $i++){
 			if($i<10){
 				$tab[$i] = array($date."-0".$i, 0, 0);
 			}else{
 				$tab[$i] = array($date."-".$i, 0, 0);
-			}
-			
+			}			
 		}
 		
 		//DATA POUR NOMBRE DE FEMMES ET HOMMES EMBOUCHES PAR MOIS DONNEE
@@ -281,35 +275,39 @@ class statsController extends Controller
 		
 		$data_all_jason = "";
 
-		$data_f = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle, d.dateEntree as dt FROM data d"
+		
+		$data_f = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle,"
+				." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt FROM data d"
 				." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
 				." AND d.dateEntree like '".$date."-%'".$st
-				." GROUP BY d.dateEntree"
+				." AND d.libSituation='Actif'"
+				." GROUP BY dt"
 				, $rsm)->getResult();
-		
-		$data_h = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle, d.dateEntree as dt FROM data d"
+		$data_h = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle,"
+				." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt FROM data d"
 				." WHERE d.libelleSexe = 'Masculin'"
 				." AND d.dateEntree like '".$date."-%'".$st
-				." GROUP BY d.dateEntree"
+				." AND d.libSituation='Actif'"
+				." GROUP BY dt"
 				, $rsm)->getResult();
 		
 						
 		$data_all_jason .= "[";
 		foreach ($data_h as $data){
-			for ($i = 1 ;$i <= $num; $i++){
+			for ($i = 1 ;$i <= 12; $i++){
 				if($tab[$i][0] == $data['d.dateEntree']){
 					$tab[$i][1] = $data['count'];
 				}
 			}
 		}
 		foreach ($data_f as $data){
-			for ($i = 1 ;$i <= $num; $i++){
+			for ($i = 1 ;$i <= 12; $i++){
 				if($tab[$i][0] == $data['d.dateEntree']){
 					$tab[$i][2] = $data['count'];
 				}
 			}
 		}
-		for ($i = 1 ;$i <= $num; $i++){
+		for ($i = 1 ;$i <= 12; $i++){
 			$data_all_jason .= "{y: '".$tab[$i][0]."', a: ".$tab[$i][1].", b:".$tab[$i][2]."},";
 		}
 		
@@ -331,17 +329,13 @@ class statsController extends Controller
 		
 		
 		
-		
-		
-		
-		
 
-		//DATA POUR NOMBRE EMBOUCHES PAR CAT PAR MOIS DONNEE
+		//DATA POUR NOMBRE EMBOUCHES PAR CAT PAR ANNEE DONNEE
 		$tab1 = array();
 		$catstab = array("","");
 		$cats_libelle = array();
 		$o = 0;
-
+		
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('classification', 'd.classification');
 		$cats = $em->createNativeQuery("SELECT d.classification"
@@ -358,7 +352,7 @@ class statsController extends Controller
 		}
 		$cats_json .= "]";
 		
-		for ($i = 1 ;$i <= $num; $i++){
+		for ($i = 1 ;$i <= 12; $i++){
 			if($i<10){
 				$t = range(0, count($catstab));
 				$t[0] = $date."-0".$i;
@@ -367,24 +361,34 @@ class statsController extends Controller
 				$t = range(0, count($catstab));
 				$t[0] = $date."-".$i;
 				$tab1[$i] = $t;
-			}				
+			}
 		}
 		
 		$data_allt_jason = "[";
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('nbr', 'count');
-		for ($i = 1 ;$i <= $num; $i++){
+		for ($i = 1 ;$i <= 12; $i++){
 			$data_allt_jason .= "{y: '".$tab1[$i][0]."',";
 			for($j = 0 ;$j < count($tab1[$i])-1; $j++){
-				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.classification as classification"
-					." FROM data d"
-					." WHERE d.dateEntree = '".$tab1[$i][0]."'"
-					." AND d.classification = '".$cats_libelle[$j]['d.classification']."'".$st
-					, $rsm)->getResult();
+				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.classification as classification,"
+						." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt "
+						." FROM data d"
+						." WHERE d.dateEntree like '".$tab1[$i][0]."-%'"
+						." AND d.classification = '".$cats_libelle[$j]['d.classification']."'".$st
+						." AND d.libSituation='Actif'"
+						." GROUP BY dt"
+						, $rsm)->getResult();
 				
 				
-				$tab1[$i][$j+1] = $datas[0]['count'];
-				$data_allt_jason .= $cats_libelle[$j]['d.classification'].": ".$datas[0]['count'].",";
+				
+		
+				if($datas){
+					$tab1[$i][$j+1] = $datas[0]['count'];
+					$data_allt_jason .= $cats_libelle[$j]['d.classification'].": ".$datas[0]['count'].",";
+				}else{
+					$tab1[$i][$j+1] = "0";
+					$data_allt_jason .= $cats_libelle[$j]['d.classification'].": 0,";
+				}
 			}
 			$data_allt_jason .= "},";
 		}
@@ -401,8 +405,8 @@ class statsController extends Controller
 		
 		
 		
-
-
+		
+		
 		//DATA POUR NOMBRE EMBOUCHES PAR TYPE DE CONTRAT(CDI, CDD) PAR MOIS DONNEE
 		$tab2 = array();
 		$typetab = array("","");
@@ -425,7 +429,7 @@ class statsController extends Controller
 		}
 		$types_json .= "]";
 		
-		for ($i = 1 ;$i <= $num; $i++){
+		for ($i = 1 ;$i <= 12; $i++){
 			if($i<10){
 				$t = range(0, count($typetab));
 				$t[0] = $date."-0".$i;
@@ -440,18 +444,26 @@ class statsController extends Controller
 		$data_alltype_jason = "[";
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('nbr', 'count');
-		for ($i = 1 ;$i <= $num; $i++){
+		for ($i = 1 ;$i <= 12; $i++){
 			$data_alltype_jason .= "{y: '".$tab1[$i][0]."',";
 			for($j = 0 ;$j < count($tab1[$i])-1; $j++){
-				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.typeContrat as typeContrat"
+				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.typeContrat as typeContrat,"
+						." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt"
 						." FROM data d"
-						." WHERE d.dateEntree = '".$tab1[$i][0]."'"
+						." WHERE d.dateEntree like '".$tab1[$i][0]."-%'"
 						." AND d.typeContrat = '".$types_libelle[$j]['d.typeContrat']."'".$st
+						." AND d.libSituation='Actif'"
+						." GROUP BY dt"
 						, $rsm)->getResult();
 		
-		
-				$tab1[$i][$j+1] = $datas[0]['count'];
-				$data_alltype_jason .= $types_libelle[$j]['d.typeContrat'].": ".$datas[0]['count'].",";
+				if($datas){
+					$tab1[$i][$j+1] = $datas[0]['count'];
+					$data_alltype_jason .= $types_libelle[$j]['d.typeContrat'].": ".$datas[0]['count'].",";
+				}else{
+					$tab1[$i][$j+1] = "0";
+					$data_alltype_jason .= $types_libelle[$j]['d.typeContrat'].": 0,";
+				}
+				
 			}
 			$data_alltype_jason .= "},";
 		}
@@ -501,7 +513,7 @@ class statsController extends Controller
 		$taux_femme = array();
 		
 		$rsm->addScalarResult('nb', 'count');
-		$total = $em->createNativeQuery("select count(*) as nb from data"
+		$total = $em->createNativeQuery("select count(*) as nb from data where libSituation='Actif'"
 				, $rsm)->getResult();
 		
 		for($i = 1; $i <= date("m"); $i++){
@@ -514,9 +526,10 @@ class statsController extends Controller
 					." FROM data d"
 					." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
 					." AND d.dateEntree < '2014-".$a."-01'"
+					." AND d.libSituation='Actif'"
 					, $rsm)->getResult();
 				
-			$calcul = round(($data_f[0]['count']*100)/$total[0]['count']);
+			$calcul = round(($data_f[0]['count']*100)/$total[0]['count'],2);
 			array_push($taux_femme, $calcul." %");
 				
 		}
@@ -536,9 +549,10 @@ class statsController extends Controller
 			$data_m = $em->createNativeQuery("SELECT SUM(d.age) as age"
 					." FROM data d"
 					." WHERE d.dateEntree < '2014-".$a."-01'"
+					." AND d.libSituation='Actif'"
 					, $rsm)->getResult();
 				
-			$calcul = round($data_m[0]['d.age']/$total[0]['count']);
+			$calcul = round($data_m[0]['d.age']/$total[0]['count'],2);
 			array_push($moyenne, $calcul." ans");
 				
 		}
@@ -558,9 +572,10 @@ class statsController extends Controller
 					." FROM data d"
 					." WHERE d.dateEntree < '2014-".$a."-01'"
 					." AND round(DATEDIFF(CURDATE(),dateEntree)/360)<5"
+					." AND d.libSituation='Actif'"
 					, $rsm)->getResult();
 				
-			$calcul = $data_m[0]['count']/$total[0]['count'];
+			$calcul = substr($data_m[0]['count']/$total[0]['count'],0,4);
 			array_push($taux_anc, $calcul." %");
 				
 		}
