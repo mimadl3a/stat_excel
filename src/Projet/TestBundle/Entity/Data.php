@@ -114,6 +114,23 @@ class Data
 
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="datePromo", type="date", nullable=true)
+     */
+    private $datePromo;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="nouvelleSituation", type="string", length=255)
+     */
+    private $nouvelleSituation;
+    
+    
+    
+    
+    /**
      * Get id
      *
      * @return integer 
@@ -420,5 +437,51 @@ class Data
     public function getAge()
     {
         return $this->age;
+    }
+
+    /**
+     * Set datePromo
+     *
+     * @param \DateTime $datePromo
+     * @return Data
+     */
+    public function setDatePromo($datePromo)
+    {
+        $this->datePromo = $datePromo;
+
+        return $this;
+    }
+
+    /**
+     * Get datePromo
+     *
+     * @return \DateTime 
+     */
+    public function getDatePromo()
+    {
+        return $this->datePromo;
+    }
+
+    /**
+     * Set nouvelleSituation
+     *
+     * @param string $nouvelleSituation
+     * @return Data
+     */
+    public function setNouvelleSituation($nouvelleSituation)
+    {
+        $this->nouvelleSituation = $nouvelleSituation;
+
+        return $this;
+    }
+
+    /**
+     * Get nouvelleSituation
+     *
+     * @return string 
+     */
+    public function getNouvelleSituation()
+    {
+        return $this->nouvelleSituation;
     }
 }

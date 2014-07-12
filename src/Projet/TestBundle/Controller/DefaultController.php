@@ -93,9 +93,14 @@ class DefaultController extends Controller
     				$d4 = new \DateTime($tab[53]);
     				$date4 = date_format(new \DateTime($d4->format("Y-m-d")),"Y-m-d");
     			}
+    			$date5 ="";
+    			if(preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $tab[49])){
+    				$d5 = new \DateTime($tab[49]);
+    				$date5 = date_format(new \DateTime($d5->format("Y-m-d")),"Y-m-d");
+    			}
     			$query ="INSERT INTO DATA(libelleEtab,Classification,"
     					."libelleSexe,dateEntree,libSituation,dateEntreeSituation,typeContrat,dateNaissance,age,recrutement,"
-    					."date,categorie,typeContrat2) values(".
+    					."date,categorie,typeContrat2,datePromo,nouvelleSituation) values(".
     					"'".$tab[2]."',"
     					."'".$tab[4]."',"
     					."'".utf8_encode($tab[9])."',"
@@ -108,7 +113,9 @@ class DefaultController extends Controller
     					."'".$tab[52]."',"
     					."'".$date4."',"
     					."'".$tab[55]."',"
-    					."'".$tab[56]."'"
+    					."'".$tab[56]."',"
+    					."'".$date5."',"
+    					."'".$tab[51]."'"
     					.")";
     			
     			$stmt = $em->getConnection()->prepare($query);

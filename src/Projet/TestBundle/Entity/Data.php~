@@ -114,6 +114,23 @@ class Data
 
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="datePromo", type="date", nullable=true)
+     */
+    private $datePromo;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="nouvelleSituation", type="string", length=255)
+     */
+    private $nouvelleSituation;
+    
+    
+    
+    
+    /**
      * Get id
      *
      * @return integer 
@@ -397,5 +414,28 @@ class Data
     public function getTypeContrat2()
     {
         return $this->typeContrat2;
+    }
+
+    /**
+     * Set age
+     *
+     * @param integer $age
+     * @return Data
+     */
+    public function setAge($age)
+    {
+        $this->age = $age;
+
+        return $this;
+    }
+
+    /**
+     * Get age
+     *
+     * @return integer 
+     */
+    public function getAge()
+    {
+        return $this->age;
     }
 }

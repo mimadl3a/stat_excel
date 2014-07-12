@@ -250,8 +250,10 @@ class statsController extends Controller
 		 
 		$dataform = $req->request->all();
 		$st = "";
+		$site = "Tous";
 		if(isset($dataform['site']) and $dataform['site'] != "Tous"){
 			$st = " AND d.libelleEtab='".$dataform['site']."'";
+			$site = $dataform['site'];
 		}
 		
 		$date = date("Y");
@@ -509,12 +511,19 @@ class statsController extends Controller
 					, $rsm)->getResult();
 				array_push($cats_c, $count[0]['count']);
 			}
+			//TOTAL PAR LIGNE
+			$t_l = 0;
+			for($ia = 0; $ia<count($cats_c); $ia++){
+				$t_l+=$cats_c[$ia];
+			}
+			array_push($cats_c, $t_l);
+			//---------------
 			
 			$motifs_libelle[$oo][1] = $cats_c;
 			$oo++;
 		}
 		$tab_total = array();
-		for($uu = 0;$uu < count($cats); $uu++){		
+		for($uu = 0;$uu < count($cats)+1; $uu++){		
 			$total = 0;
 			for($u = 1;$u <= count($motifs_libelle); $u++){
 				$total += $motifs_libelle[$u-1][1][$uu];
@@ -524,8 +533,8 @@ class statsController extends Controller
 		$motifs_libelle[$oo][0] = array("d.libSituation"=>"<b><i>Total</i></b>");
 		$motifs_libelle[$oo][1] = $tab_total;
 		
-		
-		//echo var_dump($motifs_libelle);
+		$cats_motif = $cats;
+		array_push($cats_motif, array("d.classification" => "Total"));
 		//END----------------------------------------------------------------------
 		
 		
@@ -564,7 +573,8 @@ class statsController extends Controller
 				"date" => $date,
 				"sites" => $sites,
 				"motifs_data" => $motifs_libelle,
-				"cts" => $cats
+				"cts" => $cats_motif,
+				"site" => $site
 			)
 		);
 	}
