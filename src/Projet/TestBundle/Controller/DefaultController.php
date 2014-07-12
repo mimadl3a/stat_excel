@@ -100,7 +100,7 @@ class DefaultController extends Controller
     					."'".$tab[4]."',"
     					."'".utf8_encode($tab[9])."',"
     					."'".$date1."',"
-    					."'".$tab[12]."',"
+    					."'".utf8_encode($tab[12])."',"
     					."'".$date2."',"
     					."'".$tab[15]."',"
     					."'".$date3."',"

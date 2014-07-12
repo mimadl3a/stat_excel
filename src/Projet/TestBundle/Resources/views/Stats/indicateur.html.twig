@@ -55,6 +55,22 @@ parent() }}
 								</td>							
 							{% endfor %}
 						</tr>
+						<tr>
+							<td>Taux de d&eacute;part</td>
+							{% for a in 1..nbr_mois %}						
+								<td>
+									{{ taux_dep[a-1] }}
+								</td>							
+							{% endfor %}
+						</tr>
+						<tr>
+							<td>Taux de rotation</td>
+							{% for a in 1..nbr_mois %}						
+								<td>
+									{{ taux_rot[a-1] }}
+								</td>							
+							{% endfor %}
+						</tr>
 					</tbody>
 				</table>
 						

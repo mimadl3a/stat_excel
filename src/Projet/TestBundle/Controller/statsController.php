@@ -267,7 +267,7 @@ class statsController extends Controller
 			}			
 		}
 		
-		//DATA POUR NOMBRE DE FEMMES ET HOMMES EMBOUCHES PAR MOIS DONNEE
+		//DATA POUR NOMBRE DE FEMMES ET HOMMES EMBOUCHES PAR ANNEE DONNEE
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('nbr', 'count');
 		$rsm->addScalarResult('libelle', 'd.libelleSexe');
@@ -480,6 +480,72 @@ class statsController extends Controller
 		
 		
 		
+
+		//DATA POUR NOMBRE DEPART PAR MOTIF PAR CAT PAR ANNEE DONNEE
+		
+		//RECUPERER LES MOTIFS
+		$motifs_libelle = array();
+		$oo = 0;
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('libSituation', 'd.libSituation');
+		$motifs = $em->createNativeQuery("SELECT d.libSituation"
+				." FROM data d WHERE d.libSituation<>'Actif'".$st
+				." GROUP BY d.libSituation"
+				." ORDER BY d.libSituation DESC"
+				, $rsm)->getResult();
+	
+		foreach ($motifs as $c){
+			$motifs_libelle[$oo][0] = $c;
+			
+			$cats_c = array();
+			
+			$rsm = new ResultSetMappingBuilder($em);
+			foreach($cats as $cat){
+				$rsm->addScalarResult('nbr', 'count');
+				$count = $em->createNativeQuery("SELECT count(*) as nbr"
+					." FROM data d WHERE d.libSituation='".$c['d.libSituation']."'"
+					." AND d.classification = '".$cat['d.classification']."'"
+					." AND d.dateEntreeSituation like '".$date."-%'".$st
+					, $rsm)->getResult();
+				array_push($cats_c, $count[0]['count']);
+			}
+			
+			$motifs_libelle[$oo][1] = $cats_c;
+			$oo++;
+		}
+		$tab_total = array();
+		for($uu = 0;$uu < count($cats); $uu++){		
+			$total = 0;
+			for($u = 1;$u <= count($motifs_libelle); $u++){
+				$total += $motifs_libelle[$u-1][1][$uu];
+			}
+			array_push($tab_total, "<b><i>".$total."</i></b>");
+		}
+		$motifs_libelle[$oo][0] = array("d.libSituation"=>"<b><i>Total</i></b>");
+		$motifs_libelle[$oo][1] = $tab_total;
+		
+		
+		//echo var_dump($motifs_libelle);
+		//END----------------------------------------------------------------------
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		
 		
@@ -496,7 +562,9 @@ class statsController extends Controller
 				"stats_types" => $data_alltype_jason,
 				"types" => $types_json,
 				"date" => $date,
-				"sites" => $sites
+				"sites" => $sites,
+				"motifs_data" => $motifs_libelle,
+				"cts" => $cats
 			)
 		);
 	}
@@ -585,14 +653,69 @@ class statsController extends Controller
 		
 		
 		
+
+
+		//TAUX DEPART
+		$taux_dep = array();
+		
+		for($i = 1; $i <= date("m"); $i++){
+			$rsm->addScalarResult('nbr', 'count');
+		
+			$a = $i;
+			if($i<10)$a = "0".$i;
+			$data_s = $em->createNativeQuery("SELECT count(d.id) as nbr"
+					." FROM data d"
+					." WHERE dateEntreeSituation like '2014-".$a."-%'"
+					." AND d.libSituation like 'Démissionaire'"
+					, $rsm)->getResult();
+		
+			$calcul = substr($data_s[0]['count']/$total[0]['count'],0,8);
+			array_push($taux_dep, $calcul." %");
+		
+		}
+		//----------------------------------
+		
+		
+		
+		
+		//ROTATION PERSONNEL
+		$taux_rot = array();
+		
+		for($i = 1; $i <= date("m"); $i++){
+			$rsm->addScalarResult('nbr', 'count');
+		
+			$a = $i;
+			if($i<10)$a = "0".$i;
+			$data_s = $em->createNativeQuery("SELECT count(d.id) as nbr"
+					." FROM data d"
+					." WHERE dateEntreeSituation like '2014-".$a."-%'"
+					." AND d.libSituation like 'Démissionaire'"
+					, $rsm)->getResult();
+			$data_e = $em->createNativeQuery("SELECT count(d.id) as nbr"
+					." FROM data d"
+					." WHERE d.dateEntree like '2014-".$a."-%'"
+					, $rsm)->getResult();
+		
+			$calcul = substr($data_s[0]['count'] + $data_e[0]['count']/$total[0]['count'],0,8);
+			array_push($taux_rot, $calcul." %");
+		
+		}
+		//----------------------------------
+		
+		
+		
+		
+		
 		
 		return $this->render("PBundle:Stats:indicateur.html.twig",
-			array(
-				'nbr_mois' => $nbr,
-				'taux_femme' => $taux_femme,
-				'moyenne' => $moyenne,
-				'taux_anc' => $taux_anc
-			)
+				array(
+						'nbr_mois' => $nbr,
+						'taux_femme' => $taux_femme,
+						'moyenne' => $moyenne,
+						'taux_anc' => $taux_anc,
+						'taux_dep' => $taux_dep,
+						'taux_rot' => $taux_rot
+				)
 		);
 	}
 }
