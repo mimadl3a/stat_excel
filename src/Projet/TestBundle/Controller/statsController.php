@@ -495,20 +495,20 @@ class statsController extends Controller
 				." GROUP BY d.libSituation"
 				." ORDER BY d.libSituation DESC"
 				, $rsm)->getResult();
-	
+		
 		foreach ($motifs as $c){
 			$motifs_libelle[$oo][0] = $c;
-			
+				
 			$cats_c = array();
-			
+				
 			$rsm = new ResultSetMappingBuilder($em);
 			foreach($cats as $cat){
 				$rsm->addScalarResult('nbr', 'count');
 				$count = $em->createNativeQuery("SELECT count(*) as nbr"
-					." FROM data d WHERE d.libSituation='".$c['d.libSituation']."'"
-					." AND d.classification = '".$cat['d.classification']."'"
-					." AND d.dateEntreeSituation like '".$date."-%'".$st
-					, $rsm)->getResult();
+						." FROM data d WHERE d.libSituation='".$c['d.libSituation']."'"
+						." AND d.classification = '".$cat['d.classification']."'"
+						." AND d.dateEntreeSituation like '".$date."-%'".$st
+						, $rsm)->getResult();
 				array_push($cats_c, $count[0]['count']);
 			}
 			//TOTAL PAR LIGNE
@@ -518,12 +518,12 @@ class statsController extends Controller
 			}
 			array_push($cats_c, $t_l);
 			//---------------
-			
+				
 			$motifs_libelle[$oo][1] = $cats_c;
 			$oo++;
 		}
 		$tab_total = array();
-		for($uu = 0;$uu < count($cats)+1; $uu++){		
+		for($uu = 0;$uu < count($cats)+1; $uu++){
 			$total = 0;
 			for($u = 1;$u <= count($motifs_libelle); $u++){
 				$total += $motifs_libelle[$u-1][1][$uu];
@@ -537,6 +537,69 @@ class statsController extends Controller
 		array_push($cats_motif, array("d.classification" => "Total"));
 		//END----------------------------------------------------------------------
 		
+		
+		
+		
+		
+		
+		
+		
+		
+
+		//DATA POUR NOMBRE DE PROMOS PAR ANNEE DONNEE
+		
+		//RECUPERER LES NOUVELLES SITUATIONS
+		$npromo_libelle = array();
+		$oo = 0;
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nouvelleSituation', 'd.nouvelleSituation');
+		$libelles = $em->createNativeQuery("SELECT d.nouvelleSituation"
+				." FROM data d WHERE d.nouvelleSituation<>''".$st
+				." GROUP BY d.nouvelleSituation"
+				." ORDER BY d.nouvelleSituation DESC"
+				, $rsm)->getResult();
+		
+		foreach ($libelles as $c){
+			$npromo_libelle[$oo][0] = $c;
+				
+			$promos_c = array();
+				
+			$rsm = new ResultSetMappingBuilder($em);
+			$sexe = array("Masculin", "Féminin");
+			foreach($sexe as $s){
+				$rsm->addScalarResult('nbr', 'count');
+				$count = $em->createNativeQuery("SELECT count(*) as nbr"
+						." FROM data d WHERE d.nouvelleSituation='".$c['d.nouvelleSituation']."'"
+						." AND d.libelleSexe = '".$s."'"
+						." AND d.datePromo like '".$date."-%'".$st
+						, $rsm)->getResult();
+				array_push($promos_c, $count[0]['count']);
+			}
+			//TOTAL PAR LIGNE
+			$t_l = 0;
+			for($ia = 0; $ia<count($promos_c); $ia++){
+				$t_l+=$promos_c[$ia];
+			}
+			array_push($promos_c, $t_l);
+			//---------------
+				
+			$npromo_libelle[$oo][1] = $promos_c;
+			$oo++;
+		}
+		$tab_total = array();
+		for($uu = 0;$uu < count($sexe)+1; $uu++){
+			$total = 0;
+			for($u = 1;$u <= count($npromo_libelle); $u++){
+				$total += $npromo_libelle[$u-1][1][$uu];
+			}
+			array_push($tab_total, "<b><i>".$total."</i></b>");
+		}
+		$npromo_libelle[$oo][0] = array("d.nouvelleSituation"=>"<b><i>Total</i></b>");
+		$npromo_libelle[$oo][1] = $tab_total;
+		
+		$s_motif = $sexe;
+		array_push($s_motif, array("d.classification" => "Total"));
+		//END----------------------------------------------------------------------
 		
 		
 		
@@ -574,7 +637,9 @@ class statsController extends Controller
 				"sites" => $sites,
 				"motifs_data" => $motifs_libelle,
 				"cts" => $cats_motif,
-				"site" => $site
+				"site" => $site,
+				"npromo_libelle" => $npromo_libelle,
+				"sexe" => $sexe
 			)
 		);
 	}
