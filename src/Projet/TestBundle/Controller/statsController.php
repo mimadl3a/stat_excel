@@ -371,7 +371,7 @@ class statsController extends Controller
 		$rsm->addScalarResult('nbr', 'count');
 		for ($i = 1 ;$i <= 12; $i++){
 			$data_allt_jason .= "{y: '".$tab1[$i][0]."',";
-			for($j = 0 ;$j < count($tab1[$i])-1; $j++){
+			for($j = 0 ;$j < count($cats_libelle); $j++){
 				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.classification as classification,"
 						." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt "
 						." FROM data d"
@@ -448,7 +448,7 @@ class statsController extends Controller
 		$rsm->addScalarResult('nbr', 'count');
 		for ($i = 1 ;$i <= 12; $i++){
 			$data_alltype_jason .= "{y: '".$tab1[$i][0]."',";
-			for($j = 0 ;$j < count($tab1[$i])-1; $j++){
+			for($j = 0 ;$j < count($types_libelle); $j++){
 				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.typeContrat as typeContrat,"
 						." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt"
 						." FROM data d"
@@ -606,6 +606,68 @@ class statsController extends Controller
 		
 		
 		
+		//TAUX DE SORTIE
+		$tab_ratios = array();
+		
+
+		//NBR DEPART
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$nbr_depart = $em->createNativeQuery("SELECT count(*) as nbr"
+				." FROM data d WHERE d.libSituation<>'Actif'"
+				." AND d.dateEntreeSituation like '".$date."-%'".$st
+				, $rsm)->getResult();
+		$n_depart = array();
+		array_push($n_depart, array("Nombre de départs",$nbr_depart[0]['count']));
+		array_push($tab_ratios,$n_depart);//REMPLIR TAB FINAL
+
+		
+
+
+		//NBR TOTAL
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$nbr_total = $em->createNativeQuery("SELECT count(*) as nbr"
+				." FROM data d WHERE d.libSituation = 'Actif'"
+				." AND d.dateEntree < '".$date."-12-31'".$st
+				, $rsm)->getResult();
+		$t_total = array();
+		array_push($t_total, array("Nombre total actif",$nbr_total[0]['count']));
+		array_push($tab_ratios,$t_total);//REMPLIR TAB FINAL
+		
+		
+
+
+		//TAUX 1
+		$t1 = array();
+		array_push($t1, array("<b>Taux de sortie</b>",substr(($n_depart[0][1]*100/$t_total[0][1]),0,4)." %"));
+		array_push($tab_ratios,$t1);//REMPLIR TAB FINAL 
+		
+		
+		
+		
+		
+		//-------------------------------------------------------------------------
+
+		
+		
+
+
+		//NBR DEMISSION
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$nbr_dem = $em->createNativeQuery("SELECT count(*) as nbr"
+				." FROM data d WHERE d.libSituation = 'Démissionaire'"
+				." AND d.dateEntreeSituation like '".$date."-%'".$st
+				, $rsm)->getResult();
+		$tnbr_dem = array();
+		array_push($tnbr_dem, array("Nombre de démissionaires",$nbr_dem[0]['count']));
+		array_push($tab_ratios,$tnbr_dem);//REMPLIR TAB FINAL
+		
+		
+		
+		
+		
 		
 		
 		
@@ -639,7 +701,8 @@ class statsController extends Controller
 				"cts" => $cats_motif,
 				"site" => $site,
 				"npromo_libelle" => $npromo_libelle,
-				"sexe" => $sexe
+				"sexe" => $sexe,
+				"tab_ratios" => $tab_ratios
 			)
 		);
 	}
