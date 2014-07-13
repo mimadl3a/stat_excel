@@ -10,7 +10,7 @@ security:
         in_memory:
             memory:
                 users:
-                    naoual: { password: naoualpass, roles: [ 'ROLE_ADMIN' ] }
+                    naoual: { password: naoual142, roles: [ 'ROLE_ADMIN' ] }
 
     firewalls:
         dev:

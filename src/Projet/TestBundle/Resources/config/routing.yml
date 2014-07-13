@@ -24,3 +24,26 @@ indicateur:
     defaults: { _controller: PBundle:stats:indicateur }
         
     
+    
+
+    
+# FIN SECTION CALENDRIER -----------------------------------------------
+    
+calendar:
+    pattern:  manager/calendar
+    defaults: { _controller: PBundle:Calendar:index }
+
+
+calendar_ajouter:
+    pattern:  manager/calendar/add/ajax
+    defaults: { _controller: PBundle:Calendar:ajouter }
+
+
+calendar_supprimer:
+    pattern:  manager/calendar/spr/ajax
+    defaults: { _controller: PBundle:Calendar:supprimer }
+
+    
+# FIN SECTION CALENDRIER -----------------------------------------------
+    
+    

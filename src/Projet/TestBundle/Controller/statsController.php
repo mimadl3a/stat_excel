@@ -550,6 +550,7 @@ class statsController extends Controller
 		
 		//RECUPERER LES NOUVELLES SITUATIONS
 		$npromo_libelle = array();
+		$sexe = array("Masculin", "Feminin");
 		$oo = 0;
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('nouvelleSituation', 'd.nouvelleSituation');
@@ -565,7 +566,6 @@ class statsController extends Controller
 			$promos_c = array();
 				
 			$rsm = new ResultSetMappingBuilder($em);
-			$sexe = array("Masculin", "Féminin");
 			foreach($sexe as $s){
 				$rsm->addScalarResult('nbr', 'count');
 				$count = $em->createNativeQuery("SELECT count(*) as nbr"
@@ -600,6 +600,23 @@ class statsController extends Controller
 		$s_motif = $sexe;
 		array_push($s_motif, array("d.classification" => "Total"));
 		//END----------------------------------------------------------------------
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		
 		
@@ -657,7 +674,7 @@ class statsController extends Controller
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('nbr', 'count');
 		$nbr_dem = $em->createNativeQuery("SELECT count(*) as nbr"
-				." FROM data d WHERE d.libSituation = 'Démissionaire'"
+				." FROM data d WHERE d.libSituation = 'Demissionaire'"
 				." AND d.dateEntreeSituation like '".$date."-%'".$st
 				, $rsm)->getResult();
 		$tnbr_dem = array();
@@ -665,15 +682,119 @@ class statsController extends Controller
 		array_push($tab_ratios,$tnbr_dem);//REMPLIR TAB FINAL
 		
 		
+		//NBR DEPART
+		
+
+		//TAUX 2
+		$t2 = array();
+		if($n_depart[0][1]>0){
+			array_push($t2, array("<b>Taux de démission</b>",substr(($tnbr_dem[0][1]*100/$n_depart[0][1]),0,4)." %"));
+		}else{
+			array_push($t2, array("<b>Taux de démission</b>","0 %"));
+		}
+
+		array_push($tab_ratios,$n_depart);//REMPLIR TAB FINAL
+		array_push($tab_ratios,$t2);//REMPLIR TAB FINAL
+		
+		
+		
+
+
+
+
+
+		//NBR TAUX REMPLACEMENT
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$nbr_remp = $em->createNativeQuery("SELECT count(*) as nbr"
+				." FROM data d"
+				." WHERE d.dateEntree like '".$date."-%'".$st
+				, $rsm)->getResult();
+		
+		$tnbr_remp = array();
+		array_push($tnbr_remp, array("Nombre des NR",$nbr_remp[0]['count']));
+		array_push($tab_ratios,$tnbr_remp);//REMPLIR TAB FINAL
+		
+		
+		//NBR DEPART
+		
+		
+		//TAUX 3
+		$t3 = array();
+		if($n_depart[0][1]>0){
+			array_push($t3, array("<b>Taux de remplacement</b>",substr(($tnbr_remp[0][1]*100/$n_depart[0][1]),0,8)." %"));
+		}else{
+			array_push($t3, array("<b>Taux de remplacement</b>","0 %"));
+		}
+		
+		array_push($tab_ratios,$n_depart);//REMPLIR TAB FINAL
+		array_push($tab_ratios,$t3);//REMPLIR TAB FINAL
+		
+		
+
+
+
+
+
+		//NBR TAUX REMPLACEMENT HORS OUV.
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$nbr_remp_h = $em->createNativeQuery("SELECT count(*) as nbr"
+				." FROM data d WHERE d.classification <> 'OUV'"
+				." AND d.dateEntree like '".$date."-%'".$st
+				, $rsm)->getResult();
+		
+		$tnbr_remp_h = array();
+		array_push($tnbr_remp_h, array("Nombre des NR",$nbr_remp_h[0]['count']));
+		array_push($tab_ratios,$tnbr_remp_h);//REMPLIR TAB FINAL
+		
+		
+		//NBR DEPART
+		
+		
+		//TAUX 4
+		$t4 = array();
+		if($n_depart[0][1]>0){
+			array_push($t4, array("<b>Taux de remplacement</b>",substr(($tnbr_remp_h[0][1]*100/$n_depart[0][1]),0,8)." %"));
+		}else{
+			array_push($t4, array("<b>Taux de remplacement</b>","0 %"));
+		}
+		
+		array_push($tab_ratios,$n_depart);//REMPLIR TAB FINAL
+		array_push($tab_ratios,$t4);//REMPLIR TAB FINAL
 		
 		
 		
 		
 		
 		
+
+		//NBR TAUX TURN OVER
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$total = $em->createNativeQuery("SELECT count(*) as nbr"
+				." FROM data d WHERE d.libSituation <> 'Actif'"
+				." AND d.dateEntree < '".$date."-12-31'".$st
+				, $rsm)->getResult();
+		
+		$tnbr_trv = array();
+		array_push($tnbr_trv, array("Totals des effectifs",$total[0]['count']));
 		
 		
+		//NBR DEPART
 		
+		
+		//TAUX 5
+		$t5 = array();
+		if($n_depart[0][1]>0){
+			array_push($t5, array("<b>Taux de turn over</b>",substr(($n_depart[0][1]*100/$tnbr_trv[0][1]),0,4)." %"));
+		}else{
+			array_push($t5, array("<b>Taux de turn over</b>","0 %"));
+		}
+		
+		array_push($tab_ratios,$n_depart);//REMPLIR TAB FINAL
+		array_push($tab_ratios,$tnbr_trv);//REMPLIR TAB FINAL
+		array_push($tab_ratios,$t5);//REMPLIR TAB FINAL
 		
 		
 		
@@ -758,7 +879,7 @@ class statsController extends Controller
 					." AND d.libSituation='Actif'"
 					, $rsm)->getResult();
 				
-			$calcul = round($data_m[0]['d.age']/$total[0]['count'],2);
+			$calcul = round($data_m[0]['d.age']/$total[0]['count']);
 			array_push($moyenne, $calcul." ans");
 				
 		}
@@ -804,7 +925,7 @@ class statsController extends Controller
 			$data_s = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
 					." WHERE dateEntreeSituation like '2014-".$a."-%'"
-					." AND d.libSituation like 'Démissionaire'"
+					." AND d.libSituation like 'Demissionaire'"
 					, $rsm)->getResult();
 		
 			$calcul = substr($data_s[0]['count']/$total[0]['count'],0,8);

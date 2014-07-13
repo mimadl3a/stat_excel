@@ -1,0 +1,325 @@
+{% extends 'PBundle:Layout:sb-admin.html.twig' %}
+		
+
+{% block body %}
+	
+	{{ parent() }}
+	
+	<div class="container-fluid col-sm-11 col-sm-offset-1">
+	
+		
+		
+	
+		<div id="modalbox">
+			<div class="devoops-modal">
+				<div class="devoops-modal-header">
+					<div class="modal-header-name">
+						<span>Basic table</span>
+					</div>
+					<div class="box-icons">
+						<a class="close-link">
+							<i class="fa fa-times"></i>
+						</a>
+					</div>
+				</div>
+				<div class="devoops-modal-inner">
+				</div>
+				<div class="devoops-modal-bottom">
+				</div>
+			</div>
+		</div>
+	
+		
+
+		<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+		<h2 class="page-header">Calendrier des RDV</h2>			
+			<div id="progBar" style="display: none">
+			  <img src="{{ asset('images/loading.gif') }}" />
+			</div>
+			<div class="row full-calendar">
+			
+			<div class="col-sm-12">
+				<div id="calendar"></div>
+			</div>
+			</div>
+<script>
+$(document).ready(function() {
+	// Set Block Height
+	SetMinBlockHeight($('#calendar'));
+	// Create Calendar
+	function SetMinBlockHeight(elem){
+		elem.css('min-height', window.innerHeight - 49)
+	}
+
+	//  Helper for open ModalBox with requested header, content and bottom
+	//
+	//
+	
+	
+	function OpenModalBox(header, inner, bottom){
+		var modalbox = $('#modalbox');
+		modalbox.find('.modal-header-name span').html(header);
+		modalbox.find('.devoops-modal-inner').html(inner);
+		modalbox.find('.devoops-modal-bottom').html(bottom);
+		modalbox.fadeIn('fast');
+		$('body').addClass("body-expanded");
+	}
+	//
+	//  Close modalbox
+	//
+	//
+	function CloseModalBox(){
+		var modalbox = $('#modalbox');
+		modalbox.fadeOut('fast', function(){
+			modalbox.find('.modal-header-name span').children().remove();
+			modalbox.find('.devoops-modal-inner').children().remove();
+			modalbox.find('.devoops-modal-bottom').children().remove();
+			$('body').removeClass("body-expanded");
+		});
+	}
+	function DrawCalendar(){
+		var dte;
+		/* initialize the calendar
+		-----------------------------------------------------------------*/
+		var calendar = $('#calendar').fullCalendar({
+			dayClick: function(date, allDay, jsEvent, view) {
+				var d = new Date(date);
+				jour = d.getDate();
+				mois = d.getMonth()+1;
+				if(d.getDate()<10)jour = "0"+d.getDate();
+				if((d.getMonth()+1)<10)mois = "0"+(d.getMonth()+1);
+				dte = d.getFullYear()+"-"+mois+"-"+jour; 
+				//alert('La date est: ' + dte);
+		    },
+			events: {{ liste|raw }},
+			header: {
+				left: 'prev,next today',
+				center: 'title',
+				right: ''
+			},
+			buttonText: {
+			    today: "Aujourd'hui",
+			    month: ''
+			   }
+			,
+			allDayText: 'Heures',
+			monthNames: ["Janvier","Favrier","Mars","Avril","Mai","Juin","Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre" ], 
+			monthNamesShort: ['Jan','Fev','Mar','Avr','Mai','Jui','Jul','Aou','Sep','Oct','Nov','Dec'],
+			dayNames: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+			dayNamesShort: ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
+			selectable: true,
+			selectHelper: true,
+			select: function(start, end, allDay) {
+				//alert(end);
+				var form = $('<form id="event_form">'+
+					'<div class="form-group has-success has-feedback">'+
+					'<label">Libelle</label>'+
+					'<div>'+
+					'<input type="text" id="newevent_name" class="form-control" placeholder="Titre">'+
+					'</div>'+
+					'<br><br><label>Description</label>'+
+					'<div>'+
+					'<textarea rows="3" id="newevent_desc" class="form-control" placeholder="Description"></textarea>'+
+					'</div>'+
+					'</div>'+
+					'</form>');
+				var buttons = $('<button id="event_cancel" type="cancel" class="btn btn-default btn-label-left">'+
+								'<span><i class="glyphicon glyphicon-log-out"></i></span>'+
+								' Annuler'+
+								'</button>'+
+								'<button type="submit" id="event_submit" class="btn btn-primary btn-label-left pull-right">'+
+								'<span><i class="glyphicon glyphicon-floppy-saved"></i></span>'+
+								' Ajouter'+
+								'</button>');
+				OpenModalBox('Ajouter RDV', form, buttons);
+				$('#event_cancel').on('click', function(){
+					CloseModalBox();
+				});
+				$('#event_submit').on('click', function(){
+					//alert(start.unix() +" - "+ end.unix());
+					if($('#newevent_desc').val() && $('#newevent_name').val()){
+						maj_cal($('#newevent_name').val(),$('#newevent_desc').val(),dte);
+						//alert($('#newevent_name').val());
+						var new_event_name = $('#newevent_name').val();
+						if (new_event_name != ''){
+							calendar.fullCalendar('renderEvent',
+								{
+									title: new_event_name,
+									description: $('#newevent_desc').val(),
+									start: start,
+									end: end,
+									allDay: allDay
+								},
+								true // make the event "stick"
+							);
+						}
+						CloseModalBox();
+					}else{
+						alert("Erreur, veuillez saisir le titre et la description !");
+					}
+					
+				});
+				calendar.fullCalendar('unselect');
+			},
+			editable: true,
+			droppable: true, // this allows things to be dropped onto the calendar !!!
+			drop: function(date, allDay) { // this function is called when something is dropped
+				// retrieve the dropped element's stored Event Object
+				var originalEventObject = $(this).data('eventObject');
+				// we need to copy it, so that multiple events don't have a reference to the same object
+				var copiedEventObject = $.extend({}, originalEventObject);
+				// assign it the date that was reported
+				copiedEventObject.start = date;
+				copiedEventObject.allDay = allDay;
+				// render the event on the calendar
+				// the last `true` argument determines if the event "sticks" (http://arshaw.com/fullcalendar/docs/event_rendering/renderEvent/)
+				$('#calendar').fullCalendar('renderEvent', copiedEventObject, true);
+				// is the "remove after drop" checkbox checked?
+				if ($('#drop-remove').is(':checked')) {
+					// if so, remove the element from the "Draggable Events" list
+					$(this).remove();
+				}
+			},
+			eventRender: function (event, element, icon) {
+				if (event.description != "") {
+					element.attr('title', event.description);
+				}
+			},
+			eventClick: function(calEvent, jsEvent, view) {
+				var form = $('<form id="event_form">'+
+					'<div class="form-group has-success has-feedback">'+
+					'<label">libelle</label>'+
+					'<div>'+
+					'<input type="text" id="newevent_name" value="'+ calEvent.title +'" class="form-control" placeholder="Titre">'+
+					'</div>'+
+					'<br><br><label>Description</label>'+
+					'<div>'+
+					'<textarea rows="3" id="newevent_desc" class="form-control" placeholder="Description">'+ calEvent.description +'</textarea>'+
+					'</div>'+
+					'</div>'+
+					'</form>');
+				var buttons = $('<button id="event_cancel" type="cancel" class="btn btn-default btn-label-left">'+
+								'<span><i class="glyphicon glyphicon-log-out"></i></span>'+
+								' Annuler'+
+								'</button>&nbsp;'+
+								'<button id="event_delete" type="cancel" class="btn btn-danger btn-label-left">'+
+								'<span><i class="glyphicon glyphicon-trash"></i></span>'+
+								' Supprimer'+
+								'</button>');
+				OpenModalBox('Info / Suppression', form, buttons);
+				$('#event_cancel').on('click', function(){
+					CloseModalBox();
+				});
+				$('#event_delete').on('click', function(){
+					spr_cal(calEvent._id);
+					//alert("delete: "+calEvent._id);
+					calendar.fullCalendar('removeEvents' , function(ev){
+						return (ev._id == calEvent._id);
+					});
+					CloseModalBox();
+				});
+				$('#event_change').on('click', function(){
+					calEvent.title = $('#newevent_name').val();
+					calEvent.description = $('#newevent_desc').val();
+					calendar.fullCalendar('updateEvent', calEvent);
+					CloseModalBox()
+				});
+			}
+			});
+			$('#new-event-add').on('click', function(event){
+				event.preventDefault();
+				var event_name = $('#new-event-title').val();
+				var event_description = $('#new-event-desc').val();
+				if (event_name != ''){
+				var event_template = $('<div class="external-event" data-description="'+event_description+'">'+event_name+'</div>');
+				$('#events-templates-header').after(event_template);
+				var eventObject = {
+					title: event_name,
+					description: event_description
+				};
+				// store the Event Object in the DOM element so we can get to it later
+				event_template.data('eventObject', eventObject);
+				event_template.draggable({
+					zIndex: 999,
+					revert: true,
+					revertDuration: 0
+				});
+				}
+			});
+	}
+
+	function maj_cal(titre,descr,date) {
+		$("#progBar").show();
+		$.ajax({
+			type: "POST",
+			url: "{{ path('calendar_ajouter') }}",
+			data: { titre: titre, descr: descr, date: date },
+			success: function(data){
+				$("#progBar").hide();
+				window.location.href = "{{ path('calendar') }}";
+			},
+			dataType: "html"
+		});
+	};
+
+	function spr_cal(id) {
+		$("#progBar").show();
+		$.ajax({
+			type: "POST",
+			url: "{{ path('calendar_supprimer') }}",
+			data: { id: id },
+			success: function(data){
+				$("#progBar").hide();
+			},
+			dataType: "html"
+		});
+	};
+	
+	function DrawFullCalendar(){
+		LoadCalendarScript(DrawCalendar);
+	}
+	DrawFullCalendar();
+});
+</script>
+			<!-- Add custom CSS here  -->
+			<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+			<link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
+			<link href="{{ asset('plugins/fullcalendar/fullcalendar.css') }}" rel="stylesheet">
+			<link href="{{ asset('plugins/style.css') }}" rel="stylesheet">
+			
+			
+		    
+		    <script src="{{ asset('plugins/jquery/jquery-2.1.0.min.js')}}"></script>
+			<script src="{{ asset('plugins/jquery-ui/jquery-ui.min.js')}}"></script>
+			<script>
+				function LoadCalendarScript(callback){
+					function LoadFullCalendarScript(){
+						if(!$.fn.fullCalendar){
+							$.getScript("{{ asset('plugins/fullcalendar/fullcalendar.js') }}", callback);
+						}
+						else {
+							if (callback && typeof(callback) === "function") {
+								callback();
+							}
+						}
+					}
+					if (!$.fn.moment){
+						$.getScript("{{ asset('plugins/moment/moment.min.js') }}", LoadFullCalendarScript);
+					}
+					else {
+						LoadFullCalendarScript();
+					}
+				}
+
+
+				
+			</script>
+		   
+	        
+		</div>
+	</div>
+	
+
+	
+{% endblock %}
+

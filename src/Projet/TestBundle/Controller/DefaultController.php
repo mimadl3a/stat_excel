@@ -61,7 +61,7 @@ class DefaultController extends Controller
     	$reader = new CsvReader($file);
     	$i = 0;
     	if ($handle) {
-    		while (($line = fgets($handle)) !== false) {
+    		while (($line = fgets($handle)) !== false and substr($line,0,2)!=";;") {
     			// process the line read.
     			$tab =explode(";",$line);
     			$date1 ="";
