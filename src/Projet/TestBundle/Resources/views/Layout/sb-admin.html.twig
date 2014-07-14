@@ -54,13 +54,34 @@
             <li {% if "p_homepage" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_homepage') }}"><span class="glyphicon glyphicon-upload"></span> Transfert de donn&eacute;es</a></li>
             <li {% if "p_stats_hf_nbr" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_stats_hf_nbr') }}"><span class="glyphicon glyphicon-adjust"></span> Calculs normaux</a></li>
             <li {% if "p_stats_date" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_stats_date') }}"><span class="glyphicon glyphicon-adjust"></span> Calculs par date</a></li>
-           <li {% if "indicateur" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('indicateur') }}"><span class="glyphicon glyphicon-adjust"></span> Calcul des indicateurs</a></li>
+           <li {% if "indicateur_stats" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('indicateur_stats') }}"><span class="glyphicon glyphicon-adjust"></span> Calcul des indicateurs</a></li>
            
           </ul>
 
           <ul class="nav navbar-nav navbar-right navbar-user">
             
+            {% if app.session.get('nbr_rdv') or  app.session.get('nbr_cv_tr')%}
             
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              	
+              	<img class="bell" src="{{ asset('images/bell.png') }}" />
+              	Notification <b class="caret"></b></a>
+              	<ul class="dropdown-menu">
+              	
+              	
+              	{% if app.session.get('nbr_rdv')>0 %}
+              	<li class="divider"></li>
+                <li><a href="{{ path('calendar') }}">
+                	<i class="glyphicon glyphicon-calendar"></i> 
+                		Vous avez <b class="badge">{{ app.session.get('nbr_rdv') }}</b> RDV &agrave; venir (+7 jours)</a>
+                </li>
+                <li class="divider"></li>
+                {% endif %}
+                
+              </ul>
+            </li>
+            {% endif %}
             
             
             <li class="dropdown {% if "stats" in app.request.attributes.get('_route') %}active{% endif %}">

@@ -9,12 +9,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Projet\TestBundle\Entity\Document;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class DefaultController extends Controller
 {
     public function indexAction(Request $req){
     	$em = $this->getDoctrine()->getManager();
     	$document = new Document();
+    	
+
+    	$session = new Session();
+    	CalendarController::notification($em, $session);
     	
     	$form = $this->createFormBuilder($document)
 		    	->add('file','file',array(

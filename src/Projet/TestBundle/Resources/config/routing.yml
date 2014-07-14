@@ -19,7 +19,7 @@ p_stats_date:
     defaults: { _controller: PBundle:stats:par_date }
         
     
-indicateur:
+indicateur_stats:
     pattern:  /manager/stats/indicateur
     defaults: { _controller: PBundle:stats:indicateur }
         

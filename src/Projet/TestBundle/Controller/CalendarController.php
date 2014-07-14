@@ -11,6 +11,9 @@ use Projet\TestBundle\Entity\Calendrier;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\HttpFoundation\Session\Session;
+
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 
 class CalendarController extends Controller{
 	
@@ -18,7 +21,9 @@ class CalendarController extends Controller{
 		$data = "";
 		$em = $this->getDoctrine()->getManager();
 		
-		$repo = $em->getRepository("PBundle:Calendrier");
+		$session = new Session();
+		self::notification($em, $session);
+		
 		$all = $em->createQuery("SELECT c.id, c.title, c.description, c.date"
 							   ." FROM PBundle:Calendrier c"
 		)->getResult();
@@ -67,6 +72,21 @@ class CalendarController extends Controller{
 		}
 	}
 	
+	public static function notification($em, $session) {
+		// NBR RENDEZ VOUS
+		$rsm = new ResultSetMappingBuilder ( $em );
+		$rsm->addScalarResult ( 'nbr', 'count' );
 	
+		$data = $em->createNativeQuery ( "SELECT count(rdv.id) as nbr FROM calendrier rdv"
+				. " WHERE rdv.date BETWEEN DATE_FORMAT(CURRENT_DATE, '%Y-%m-%d') AND DATE_ADD(CURRENT_DATE, INTERVAL 7 DAY) "
+				. " ORDER BY rdv.date", $rsm )
+				->getResult ();
+		if ($data) {
+			$session->set ( 'nbr_rdv', $data [0] ['count'] );
+		} else {
+			$session->set ( 'nbr_rdv', '0' );
+		}
+	
+	}
 	
 }

@@ -12,12 +12,17 @@ use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 
 use Projet\TestBundle\Entity\Document;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class statsController extends Controller
 {
     public function hf_nbrAction(Request $req){
     	
     	$em = $this->getDoctrine()->getManager();
+    	
+
+    	$session = new Session();
+    	CalendarController::notification($em, $session);
     	
     	/*$sDateBirth = "1985-10-29";
     	
@@ -239,6 +244,8 @@ class statsController extends Controller
 	public function par_dateAction(Request $req){
 		$em = $this->getDoctrine()->getManager();
 		
+		$session = new Session();
+		CalendarController::notification($em, $session);
 
 		$sites = array();
 		$rsm = new ResultSetMappingBuilder($em);
@@ -832,6 +839,8 @@ class statsController extends Controller
 		$em = $this->getDoctrine()->getManager();
 		$nbr = 0;
 		
+		$session = new Session();
+		CalendarController::notification($em, $session);
 		
 		$rsm = new ResultSetMappingBuilder($em);
 		
