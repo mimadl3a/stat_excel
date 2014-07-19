@@ -9,13 +9,41 @@ parent() }}
 				<strong>{{ flashMessage|raw }}</strong>
 			</div>
 			{% endfor %}
+			
+			
+			
+			
+			<div class="col-md-12">
+				<div class="col-md-2">
+					Sites: 
+				</div>
+				<div class="col-md-10">
+					<form method="post" action="{{ path('indicateur_stats') }}">
+						<div class="col-md-4">
+							<select name="site" class="form-control">
+								<option>Tous</option>
+								{% for site in sites %}
+									<option>{{ site['d.libelleEtab'] }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						
+						<div class="col-md-2">
+							<input type="submit" class="btn btn-primary">
+						</div>
+					</form>
+				<br><br>
+				</div>				
+			</div>
+			
+			
 
 			<div class="col-lg-12">
 
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h3 class="panel-title">
-							<i class="fa fa-bar-chart-o"></i> Indicateurs
+							<i class="fa fa-bar-chart-o"></i> Indicateurs par site: " <b>{{ site }}</b>  "
 						</h3>
 					</div>
 					<div class="panel-body">

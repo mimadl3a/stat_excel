@@ -39,6 +39,12 @@ calendar_ajouter:
     defaults: { _controller: PBundle:Calendar:ajouter }
 
 
+calendar_modifier:
+    pattern: manager/calendar/up/ajax
+    defaults: { _controller: PBundle:Calendar:modifier }
+
+
+
 calendar_supprimer:
     pattern:  manager/calendar/spr/ajax
     defaults: { _controller: PBundle:Calendar:supprimer }

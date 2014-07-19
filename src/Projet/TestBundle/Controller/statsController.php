@@ -835,9 +835,30 @@ class statsController extends Controller
 		);
 	}
 
-	public function indicateurAction(){
+	public function indicateurAction(Request $req){
 		$em = $this->getDoctrine()->getManager();
 		$nbr = 0;
+		
+
+		$dataform = $req->request->all();
+		$st = "";
+		$site = "Tous";
+		if(isset($dataform['site']) and $dataform['site'] != "Tous"){
+			$st = " AND d.libelleEtab='".$dataform['site']."'";
+			$site = $dataform['site'];
+		}
+		
+		$sites = array();
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('libelle', 'd.libelleEtab');
+		$sites = $em->createNativeQuery("SELECT d.libelleEtab as libelle FROM data d"
+				." GROUP BY d.libelleEtab"
+				, $rsm)->getResult();
+			
+		
+		
+		
+		
 		
 		$session = new Session();
 		CalendarController::notification($em, $session);
@@ -849,7 +870,7 @@ class statsController extends Controller
 		$taux_femme = array();
 		
 		$rsm->addScalarResult('nb', 'count');
-		$total = $em->createNativeQuery("select count(*) as nb from data where libSituation='Actif'"
+		$total = $em->createNativeQuery("select count(*) as nb from data d where d.libSituation='Actif'".$st
 				, $rsm)->getResult();
 		
 		for($i = 1; $i <= date("m"); $i++){
@@ -862,7 +883,7 @@ class statsController extends Controller
 					." FROM data d"
 					." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
 					." AND d.dateEntree < '2014-".$a."-01'"
-					." AND d.libSituation='Actif'"
+					." AND d.libSituation='Actif'".$st
 					, $rsm)->getResult();
 				
 			$calcul = round(($data_f[0]['count']*100)/$total[0]['count'],2);
@@ -885,7 +906,7 @@ class statsController extends Controller
 			$data_m = $em->createNativeQuery("SELECT SUM(d.age) as age"
 					." FROM data d"
 					." WHERE d.dateEntree < '2014-".$a."-01'"
-					." AND d.libSituation='Actif'"
+					." AND d.libSituation='Actif'".$st
 					, $rsm)->getResult();
 				
 			$calcul = round($data_m[0]['d.age']/$total[0]['count']);
@@ -908,7 +929,7 @@ class statsController extends Controller
 					." FROM data d"
 					." WHERE d.dateEntree < '2014-".$a."-01'"
 					." AND round(DATEDIFF(CURDATE(),dateEntree)/360)<5"
-					." AND d.libSituation='Actif'"
+					." AND d.libSituation='Actif'".$st
 					, $rsm)->getResult();
 				
 			$calcul = substr($data_m[0]['count']/$total[0]['count'],0,4);
@@ -934,7 +955,7 @@ class statsController extends Controller
 			$data_s = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
 					." WHERE dateEntreeSituation like '2014-".$a."-%'"
-					." AND d.libSituation like 'Demissionaire'"
+					." AND d.libSituation like 'Demissionaire'".$st
 					, $rsm)->getResult();
 		
 			$calcul = substr($data_s[0]['count']/$total[0]['count'],0,8);
@@ -961,7 +982,7 @@ class statsController extends Controller
 					, $rsm)->getResult();
 			$data_e = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
-					." WHERE d.dateEntree like '2014-".$a."-%'"
+					." WHERE d.dateEntree like '2014-".$a."-%'".$st
 					, $rsm)->getResult();
 		
 			$calcul = substr($data_s[0]['count'] + $data_e[0]['count']/$total[0]['count'],0,8);
@@ -976,14 +997,16 @@ class statsController extends Controller
 		
 		
 		return $this->render("PBundle:Stats:indicateur.html.twig",
-				array(
-						'nbr_mois' => $nbr,
-						'taux_femme' => $taux_femme,
-						'moyenne' => $moyenne,
-						'taux_anc' => $taux_anc,
-						'taux_dep' => $taux_dep,
-						'taux_rot' => $taux_rot
-				)
+			array(
+				'nbr_mois' => $nbr,
+				'taux_femme' => $taux_femme,
+				'moyenne' => $moyenne,
+				'taux_anc' => $taux_anc,
+				'taux_dep' => $taux_dep,
+				'taux_rot' => $taux_rot,
+				'sites' => $sites,
+				'site' => $site
+			)
 		);
 	}
 }

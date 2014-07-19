@@ -71,6 +71,23 @@ class CalendarController extends Controller{
 			return;
 		}
 	}
+
+	
+	public function modifierAction(Request $req){
+		if($req->get("id") && $req->get("titre") && $req->get("descr")){
+			$em = $this->getDoctrine()->getManager();
+			$repo = $em->getRepository("PBundle:Calendrier");
+			$a = $repo->find($req->get("id"));
+	
+			$a->setTitle($req->get("titre"));
+			$a->setDescription($req->get("descr"));
+	
+			$em->flush();
+			return new Response("ok");
+		}else{
+			return;
+		}
+	}
 	
 	public static function notification($em, $session) {
 		// NBR RENDEZ VOUS

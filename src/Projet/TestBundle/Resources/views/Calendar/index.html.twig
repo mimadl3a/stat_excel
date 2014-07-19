@@ -138,7 +138,7 @@ $(document).ready(function() {
 				$('#event_submit').on('click', function(){
 					//alert(start.unix() +" - "+ end.unix());
 					if($('#newevent_desc').val() && $('#newevent_name').val()){
-						maj_cal($('#newevent_name').val(),$('#newevent_desc').val(),dte);
+						ajouter($('#newevent_name').val(),$('#newevent_desc').val(),dte);
 						//alert($('#newevent_name').val());
 						var new_event_name = $('#newevent_name').val();
 						if (new_event_name != ''){
@@ -205,17 +205,29 @@ $(document).ready(function() {
 								'<button id="event_delete" type="cancel" class="btn btn-danger btn-label-left">'+
 								'<span><i class="glyphicon glyphicon-trash"></i></span>'+
 								' Supprimer'+
+								'</button>'+
+								'<button type="submit" id="event_change" class="btn btn-primary btn-label-left pull-right">'+
+								'<span><i class="fa fa-clock-o"></i></span> '+
+								'Mettre &agrave; jour'+
 								'</button>');
 				OpenModalBox('Info / Suppression', form, buttons);
 				$('#event_cancel').on('click', function(){
 					CloseModalBox();
 				});
+				$('#event_change').on('click', function(){
+					if($('#newevent_desc').val() && $('#newevent_name').val()){
+						Update(calEvent._id,$('#newevent_name').val(),$('#newevent_desc').val());
+						CloseModalBox();
+					}else{
+						alert("Veuillez remplir tous les champs !");
+					}
+				});
 				$('#event_delete').on('click', function(){
 					spr_cal(calEvent._id);
 					//alert("delete: "+calEvent._id);
 					calendar.fullCalendar('removeEvents' , function(ev){
-						return (ev._id == calEvent._id);
-					});
+					return (ev._id == calEvent._id);
+				});
 					CloseModalBox();
 				});
 				$('#event_change').on('click', function(){
@@ -248,7 +260,24 @@ $(document).ready(function() {
 			});
 	}
 
-	function maj_cal(titre,descr,date) {
+
+
+
+	function Update(id,titre,descr) {
+		$("#progBar").show();
+		$.ajax({
+			type: "POST",
+			url: "{{ path('calendar_modifier') }}",
+			data: { id: id, titre: titre, descr: descr },
+			success: function(data){
+			$("#progBar").hide();
+			//window.location.href = "{{ path('calendar') }}";
+		},
+			dataType: "html"
+		});
+	};
+	
+	function ajouter(titre,descr,date) {
 		$("#progBar").show();
 		$.ajax({
 			type: "POST",
