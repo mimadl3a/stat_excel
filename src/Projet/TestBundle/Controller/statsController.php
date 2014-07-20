@@ -23,14 +23,7 @@ class statsController extends Controller
 
     	$session = new Session();
     	CalendarController::notification($em, $session);
-    	
-    	/*$sDateBirth = "1985-10-29";
-    	
-    	$oDateNow = new \DateTime();
-    	$oDateBirth = new \DateTime($sDateBirth);
-    	$oDateIntervall = $oDateNow->diff($oDateBirth);
-    	echo $oDateIntervall->y;*/
-    	
+    	    	
     	
     	$sites = array();
     	$rsm = new ResultSetMappingBuilder($em);
@@ -42,18 +35,28 @@ class statsController extends Controller
     	
     	$dataform = $req->request->all();
     	$st = "";
+    	$site = "Tous";
     	if(isset($dataform['site']) and $dataform['site'] != "Tous"){
     		$st = " AND d.libelleEtab='".$dataform['site']."'";
+    		$site = $dataform['site'];
     	}
+    	$tab_data1 = array();
+    	$tab_data1[0] = array("Homme");
+    	$tab_data1[1] = array("Femme");
 
     	//DATA STATS POUR PYRAMIDE DES AGES
     	$ages = array(
-    			'0 and 4','5 and 9','10 and 14','15 and 19','20 and 24','25 and 29','30 and 34',
-    			'35 and 39','40 and 44','45 and 49','50 and 54','55 and 59','60 and 64','64 and 69',
-    			'70 and 74','75 and 79','80 and 84','85 and 99'
+    		'0 and 4','5 and 9','10 and 14','15 and 19','20 and 24','25 and 29','30 and 34',
+    		'35 and 39','40 and 44','45 and 49','50 and 54','55 and 59','60 and 64','64 and 69',
+    		'70 and 74','75 and 79','80 and 84','85 and 99'
+    	);
+    	$ages1 = array(
+    		'0 <br>-<br> 4','5 <br>-<br> 9','10 <br>-<br> 14','15 <br>-<br> 19','20 <br>-<br> 24','25 <br>-<br> 29','30 <br>-<br> 34',
+    		'35 <br>-<br> 39','40 <br>-<br> 44','45 <br>-<br> 49','50 <br>-<br> 54','55 <br>-<br> 59','60 <br>-<br> 64','64 <br>-<br> 69',
+    		'70 <br>-<br> 74','75 <br>-<br> 79','80 <br>-<br> 84','85+'
     	);
     	
-    	 
+    	
     	$data_age_jason = "[";
     	$data_age_jason .= "['Age', 'Femme', 'Homme' ],";
     	 
@@ -66,11 +69,14 @@ class statsController extends Controller
     				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
     				." AND d.libSituation = 'Actif'".$st
     				, $rsm)->getResult();
+    		array_push($tab_data1[1], $data_age_f[0]['count']);
+    		
     		$data_age_h = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE age between ".$age
     				." AND d.libelleSexe = 'Masculin'"
     				." AND d.libSituation = 'Actif'".$st
     				, $rsm)->getResult();
+    		array_push($tab_data1[0], $data_age_h[0]['count']);
     	
     		
     		if($age == "85 and 99"){
@@ -84,13 +90,13 @@ class statsController extends Controller
     	
     	$data_age_jason .= "]";
     	 
-    	 
+    	
     	 
     	 
 
     	//DATA STATS PAR ANCIENTE
     	$nbr_annees = array(
-    			'0 and 2','2 and 5','5 and 12','12 and 20','20 and 25','25 and 200'
+    		'0 and 2','3 and 5','6 and 12','13 and 20','21 and 25','26 and 200'
     	);
     	 
     	 
@@ -102,23 +108,26 @@ class statsController extends Controller
     		$rsm->addScalarResult('nbr', 'count');
     	
     		$data_an_f = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
-    				." WHERE round(DATEDIFF(CURDATE(),dateEntree)/360) between ".$nbr_annee
+    				." WHERE round(DATEDIFF(CONCAT_WS('-',YEAR(CURDATE()),MONTH(CURDATE()),'01'),dateEntree)/365)"
+    				." between ".$nbr_annee
     				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
     				." AND d.libSituation = 'Actif'".$st
     				, $rsm)->getResult();
     		$data_an_h = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
-    				." WHERE round(DATEDIFF(CURDATE(),dateEntree)/360) between ".$nbr_annee
+    				." WHERE round(DATEDIFF(CONCAT_WS('-',YEAR(CURDATE()),MONTH(CURDATE()),'01'),dateEntree)/365)"
+    				." between ".$nbr_annee
     				." AND d.libelleSexe = 'Masculin'"
     				." AND d.libSituation = 'Actif'".$st
     				, $rsm)->getResult();
+    		
     	
-    		if($nbr_annee == "25 and 200"){
-    			$data_an_jason .= "['+25 ans', ".$data_an_f[0]['count'].", -"
-    					.$data_an_h[0]['count']."],";
+    		if($nbr_annee == "26 and 200"){
+    			$data_an_jason .= "['+26 ans', ".$data_an_f[0]['count'].", -"
+    				.$data_an_h[0]['count']."],";
     		}else{
     			$data_an_jason .= "['".str_replace(' and ', "-", $nbr_annee)
     			." ans', ".$data_an_f[0]['count'].", -"
-    					.$data_an_h[0]['count']."],";
+    			.$data_an_h[0]['count']."],";
     		}
     		
     	
@@ -236,7 +245,10 @@ class statsController extends Controller
 				"couleur2" => $col2,
 				"stats_age" => $data_age_jason,
 				"stats_an" => $data_an_jason,
-				"sites" => $sites
+				"sites" => $sites,
+				"site" => $site,
+				"tab_data1" => $tab_data1,
+				"ages" => $ages1
         	)
 		);
     }
@@ -872,7 +884,7 @@ class statsController extends Controller
 		$rsm->addScalarResult('nb', 'count');
 		$total = $em->createNativeQuery("select count(*) as nb from data d where d.libSituation='Actif'".$st
 				, $rsm)->getResult();
-		
+		$tt = 0;
 		for($i = 1; $i <= date("m"); $i++){
 			$nbr++;
 			$rsm->addScalarResult('nbr_f', 'count');
@@ -888,8 +900,10 @@ class statsController extends Controller
 				
 			$calcul = round(($data_f[0]['count']*100)/$total[0]['count'],2);
 			array_push($taux_femme, $calcul." %");
+			$tt += $calcul;
 				
 		}
+		array_push($taux_femme, round($tt/date("m"),2)." %");
 		//----------------------------------
 		
 		
@@ -897,7 +911,7 @@ class statsController extends Controller
 
 		//MOYENNE D'AGE
 		$moyenne = array();
-		
+		$tt = 0;
 		for($i = 1; $i <= date("m"); $i++){
 			$rsm->addScalarResult('age', 'd.age');
 				
@@ -911,15 +925,17 @@ class statsController extends Controller
 				
 			$calcul = round($data_m[0]['d.age']/$total[0]['count']);
 			array_push($moyenne, $calcul." ans");
-				
+			$tt += $calcul;
 		}
+		array_push($moyenne, round($tt/date("m"))." ans");
 		//----------------------------------
 		
 
 
 		//TAUX ANCIEN
 		$taux_anc = array();
-		
+		$tt = 0;
+		$ac = 0;
 		for($i = 1; $i <= date("m"); $i++){
 			$rsm->addScalarResult('nbr', 'count');
 				
@@ -927,17 +943,19 @@ class statsController extends Controller
 			if($i<10)$a = "0".$i;
 			$data_m = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
-					." WHERE d.dateEntree < '2014-".$a."-01'"
-					." AND round(DATEDIFF(CURDATE(),dateEntree)/360)<5"
+					." WHERE d.dateEntree <= '2014-".$a."-01'"
+					." AND round(DATEDIFF('2014-".$a."-01',dateEntree)/365)<=5"
 					." AND d.libSituation='Actif'".$st
 					, $rsm)->getResult();
+			//echo $data_m[0]['count'].'<br><br>';
 				
 			$calcul = substr($data_m[0]['count']/$total[0]['count'],0,4);
-			array_push($taux_anc, $calcul." %");
+			array_push($taux_anc, $calcul." ");
+			$tt += $calcul;
 				
 		}
+		array_push($taux_anc, substr($tt/date("m"),0,4)." ");
 		//----------------------------------
-		
 		
 		
 		
@@ -946,6 +964,7 @@ class statsController extends Controller
 
 		//TAUX DEPART
 		$taux_dep = array();
+		$tt = 0;
 		
 		for($i = 1; $i <= date("m"); $i++){
 			$rsm->addScalarResult('nbr', 'count');
@@ -960,8 +979,10 @@ class statsController extends Controller
 		
 			$calcul = substr($data_s[0]['count']/$total[0]['count'],0,8);
 			array_push($taux_dep, $calcul." %");
+			$tt += $calcul;
 		
 		}
+		array_push($taux_dep, substr($tt/date("m"),0,8)." %");
 		//----------------------------------
 		
 		
@@ -969,6 +990,7 @@ class statsController extends Controller
 		
 		//ROTATION PERSONNEL
 		$taux_rot = array();
+		$tt = 0;
 		
 		for($i = 1; $i <= date("m"); $i++){
 			$rsm->addScalarResult('nbr', 'count');
@@ -987,8 +1009,10 @@ class statsController extends Controller
 		
 			$calcul = substr($data_s[0]['count'] + $data_e[0]['count']/$total[0]['count'],0,8);
 			array_push($taux_rot, $calcul." %");
+			$tt += $calcul;
 		
 		}
+		array_push($taux_rot, substr($tt/date("m"),0,8)." %");
 		//----------------------------------
 		
 		
