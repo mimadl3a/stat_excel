@@ -95,8 +95,15 @@ class statsController extends Controller
     	 
 
     	//DATA STATS PAR ANCIENTE
+
+    	$tab_data2 = array();
+    	$tab_data2[0] = array("Homme");
+    	$tab_data2[1] = array("Femme");
     	$nbr_annees = array(
     		'0 and 2','3 and 5','6 and 12','13 and 20','21 and 25','26 and 200'
+    	);
+    	$nbr_annees1 = array(
+    		'0 <br>-<br> 2','3 <br>-<br> 5','6 <br>-<br> 12','13 <br>-<br> 20','21 <br>-<br> 25','26+'
     	);
     	 
     	 
@@ -113,12 +120,14 @@ class statsController extends Controller
     				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
     				." AND d.libSituation = 'Actif'".$st
     				, $rsm)->getResult();
+    		array_push($tab_data2[1], $data_an_f[0]['count']);
     		$data_an_h = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
     				." WHERE round(DATEDIFF(CONCAT_WS('-',YEAR(CURDATE()),MONTH(CURDATE()),'01'),dateEntree)/365)"
     				." between ".$nbr_annee
     				." AND d.libelleSexe = 'Masculin'"
     				." AND d.libSituation = 'Actif'".$st
     				, $rsm)->getResult();
+    		array_push($tab_data2[0], $data_an_h[0]['count']);
     		
     	
     		if($nbr_annee == "26 and 200"){
@@ -149,7 +158,9 @@ class statsController extends Controller
 
     	//DATA POUR NOMBRE DE FEMMES ET HOMMES
     	$background_colors = array('#CD00CD', '#8B1C62', '#EE4000', '#FFEFD5');
-    	 
+    	$tab_data3 = "";
+    	
+    	
     	$rsm = new ResultSetMappingBuilder($em);
     	$rsm->addScalarResult('nbr', 'count');
     	$rsm->addScalarResult('libelle', 'd.libelleSexe');
@@ -165,6 +176,7 @@ class statsController extends Controller
     	$o = 0;
     	$col ="";
     	foreach ($data_st as $data){
+    		$tab_data3 .= "<b>".$data['d.libelleSexe']."</b>: ".$data['count']."<br>";
     		$data_st_jason .= "{value: ".$data['count'].", label: '".$data['d.libelleSexe']."'},";
     		$col .= "'".$background_colors[$o]."',";
     		$o++;
@@ -177,7 +189,7 @@ class statsController extends Controller
 
     	//DATA POUR NOMBRE DE CDI ET CDD
     	$background_colors1 = array('#8B7500','#7FFF00', '#FFEFD5', '#EE4000', '#495E67');
-    	
+    	$tab_data4 = "";
     	$rsm = new ResultSetMappingBuilder($em);
     	$rsm->addScalarResult('nbr', 'count');
     	$rsm->addScalarResult('typec', 'd.typeContrat');
@@ -193,6 +205,7 @@ class statsController extends Controller
     	$o1 = 0;
     	$col1 ="";
     	foreach ($data_sty as $data){
+    		$tab_data4 .= "<b>".$data['d.typeContrat']."</b>: ".$data['count']."<br>";
     		$data_sty_jason .= "{value: ".$data['count'].", label: '".$data['d.typeContrat']."'},";
     		$col1 .= "'".$background_colors1[$o1]."',";
     		$o1++;
@@ -208,7 +221,7 @@ class statsController extends Controller
 
     	//DATA POUR NOMBRE PAR CATEGORIE
     	$background_colors2 = array('#495E67','#8B7500', '#EE4000', '#7FFF00', '#FFEFD5');
-    	
+    	$tab_data5 = "";
     	$rsm = new ResultSetMappingBuilder($em);
     	$rsm->addScalarResult('nbr', 'count');
     	$rsm->addScalarResult('cat', 'd.classification');
@@ -224,6 +237,7 @@ class statsController extends Controller
     	$o2 = 0;
     	$col2 ="";
     	foreach ($data_cat as $data){
+    		$tab_data5 .= "<b>".$data['d.classification']."</b>: ".$data['count']."<br>";
     		$data_cat_jason .= "{value: ".$data['count'].", label: '".$data['d.classification']."'},";
     		$col2 .= "'".$background_colors2[$o2]."',";
     		$o2++;
@@ -248,7 +262,12 @@ class statsController extends Controller
 				"sites" => $sites,
 				"site" => $site,
 				"tab_data1" => $tab_data1,
-				"ages" => $ages1
+				"ages" => $ages1,
+				"tab_data2" => $tab_data2,
+				"nbr_annees" => $nbr_annees1,
+				"tab_data3" => $tab_data3,
+				"tab_data4" => $tab_data4,
+				"tab_data5" => $tab_data5
         	)
 		);
     }
@@ -279,6 +298,11 @@ class statsController extends Controller
 		if($req->get('startDate'))$date = $req->get('startDate');
 				
 		$tab = array();
+		
+		$tab_data1 = array();
+		$tab_data1[0] = array("Homme", array("0","0","0","0","0","0","0","0","0","0","0","0"));
+		$tab_data1[1] = array("Femme", array("0","0","0","0","0","0","0","0","0","0","0","0"));
+		
 		
 		for ($i = 1 ;$i <= 12; $i++){
 			if($i<10){
@@ -318,6 +342,7 @@ class statsController extends Controller
 			for ($i = 1 ;$i <= 12; $i++){
 				if($tab[$i][0] == $data['d.dateEntree']){
 					$tab[$i][1] = $data['count'];
+					$tab_data1[0][1][$i-1] = $data['count'];
 				}
 			}
 		}
@@ -325,6 +350,7 @@ class statsController extends Controller
 			for ($i = 1 ;$i <= 12; $i++){
 				if($tab[$i][0] == $data['d.dateEntree']){
 					$tab[$i][2] = $data['count'];
+					$tab_data1[1][1][$i-1] = $data['count'];
 				}
 			}
 		}
@@ -346,16 +372,15 @@ class statsController extends Controller
 		
 		
 		
-		
-		
-		
-		
 
 		//DATA POUR NOMBRE EMBOUCHES PAR CAT PAR ANNEE DONNEE
 		$tab1 = array();
 		$catstab = array("","");
 		$cats_libelle = array();
 		$o = 0;
+		
+
+		$tab_data2 = array();
 		
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('classification', 'd.classification');
@@ -366,6 +391,7 @@ class statsController extends Controller
 				, $rsm)->getResult();
 		$cats_json = "[";
 		foreach ($cats as $c){
+			$tab_data2[$o] = array($c['d.classification'], array("0","0","0","0","0","0","0","0","0","0","0","0"));
 			$catstab[$o] = "";
 			$cats_libelle[$o] = $c;
 			$o++;
@@ -401,14 +427,17 @@ class statsController extends Controller
 						, $rsm)->getResult();
 				
 				
-				
 		
 				if($datas){
 					$tab1[$i][$j+1] = $datas[0]['count'];
 					$data_allt_jason .= $cats_libelle[$j]['d.classification'].": ".$datas[0]['count'].",";
+					
+					$tab_data2[$j][1][$i-1] = $datas[0]['count'];
 				}else{
 					$tab1[$i][$j+1] = "0";
 					$data_allt_jason .= $cats_libelle[$j]['d.classification'].": 0,";
+
+					$tab_data2[$j][1][$i-1] = "0";
 				}
 			}
 			$data_allt_jason .= "},";
@@ -433,6 +462,8 @@ class statsController extends Controller
 		$typetab = array("","");
 		$types_libelle = array();
 		$o = 0;
+
+		$tab_data3 = array();
 		
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('typeContrat', 'd.typeContrat');
@@ -443,6 +474,7 @@ class statsController extends Controller
 				, $rsm)->getResult();
 		$types_json = "[";
 		foreach ($types as $c){
+			$tab_data3[$o] = array($c['d.typeContrat'], array("0","0","0","0","0","0","0","0","0","0","0","0"));
 			$typetab[$o] = "";
 			$types_libelle[$o] = $c;
 			$o++;
@@ -480,9 +512,13 @@ class statsController extends Controller
 				if($datas){
 					$tab1[$i][$j+1] = $datas[0]['count'];
 					$data_alltype_jason .= $types_libelle[$j]['d.typeContrat'].": ".$datas[0]['count'].",";
+					
+					$tab_data3[$j][1][$i-1] = $datas[0]['count'];
 				}else{
 					$tab1[$i][$j+1] = "0";
 					$data_alltype_jason .= $types_libelle[$j]['d.typeContrat'].": 0,";
+					
+					$tab_data3[$j][1][$i-1] = "0";
 				}
 				
 			}
@@ -842,7 +878,12 @@ class statsController extends Controller
 				"site" => $site,
 				"npromo_libelle" => $npromo_libelle,
 				"sexe" => $sexe,
-				"tab_ratios" => $tab_ratios
+				"tab_ratios" => $tab_ratios,
+				"mois" => $tab,
+				"tab_data1" => $tab_data1,
+				"tab_data2" => $tab_data2,
+				"tab_data3" => $tab_data3,
+				
 			)
 		);
 	}

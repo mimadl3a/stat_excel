@@ -170,8 +170,36 @@ parent() }}
 							<div class="panel-body">
 								<div id="morris-line-chart"></div>
 							</div>
+							
+				<table class="table table-bordered table-hover table-striped sortable" id="liste_cat">
+					<thead>
+						<tr>
+							<td></td>
+							{% for a in mois %}						
+								<td>
+									{{ a[0]|raw }}
+								</td>							
+							{% endfor %}
+							
+						</tr>
+					</thead>
+					<tbody>
+						{% for data in tab_data1 %}
+						<tr>
+							<td>
+								{{ data[0] }}
+							</td>
+							{% for d in data[1] %}
+							<td>
+								{{ d }}
+							</td>
+							{% endfor %}
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+							
 						</div>
-					
 					</div>
 				</div>
 				
@@ -188,8 +216,38 @@ parent() }}
 							<div class="panel-body">
 								<div id="morris-line-chart-cat"></div>
 							</div>
+							
+							
+				<table class="table table-bordered table-hover table-striped sortable" id="liste_cat">
+					<thead>
+						<tr>
+							<td></td>
+							{% for a in mois %}						
+								<td>
+									{{ a[0]|raw }}
+								</td>							
+							{% endfor %}
+							
+						</tr>
+					</thead>
+					<tbody>
+						{% for data in tab_data2 %}
+						<tr>
+							<td>
+								{{ data[0] }}
+							</td>
+							{% for d in data[1] %}
+							<td>
+								{{ d }}
+							</td>
+							{% endfor %}
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+							
+							
 						</div>
-					
 					</div>
 				</div>
 				
@@ -205,8 +263,38 @@ parent() }}
 							</div>
 							<div class="panel-body">
 								<div id="morris-line-chart-type"></div>
-							</div>
+							</div>		
+				<table class="table table-bordered table-hover table-striped sortable" id="liste_cat">
+					<thead>
+						<tr>
+							<td></td>
+							{% for a in mois %}						
+								<td>
+									{{ a[0]|raw }}
+								</td>							
+							{% endfor %}
+							
+						</tr>
+					</thead>
+					<tbody>
+						{% for data in tab_data3 %}
+						<tr>
+							<td>
+								{{ data[0] }}
+							</td>
+							{% for d in data[1] %}
+							<td>
+								{{ d }}
+							</td>
+							{% endfor %}
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+					
+					
 						</div>
+					
 					
 					</div>
 				</div>

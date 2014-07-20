@@ -63,7 +63,7 @@ parent() }}
 						<tr>
 							{% for d in data %}
 								<td>
-									{{ d }}
+									<b>{{ d }}</b>
 								</td>
 							{% endfor %}
 						</tr>
@@ -89,6 +89,34 @@ parent() }}
 						<div id="chart_div_an" style="height: 400px;"></div>
 					</div>
 				</div>
+				
+				
+				<table class="table table-bordered table-hover table-striped sortable" id="liste_cat">
+					<thead>
+						<tr>
+							<td></td>
+							{% for a in nbr_annees %}						
+								<td>
+									{{ a|raw }}
+								</td>							
+							{% endfor %}
+							
+						</tr>
+					</thead>
+					<tbody>
+						{% for data in tab_data2 %}
+						<tr>
+							{% for d in data %}
+								<td>
+									<b>{{ d }}</b>
+								</td>
+							{% endfor %}
+						</tr>
+						{% endfor %}
+					</tbody>
+					</table>
+				
+				
 			</div>
 
 			<div class="col-lg-4">
@@ -102,6 +130,7 @@ parent() }}
 					<div class="panel-body">
 						<div id="graph_cty"></div>
 					</div>
+					<div style="padding:10px">{{ tab_data4|raw }}</div>
 				</div>
 			</div>
 			<div class="col-lg-4">
@@ -115,6 +144,7 @@ parent() }}
 					<div class="panel-body">
 						<div id="graph"></div>
 					</div>
+				<div style="padding:10px">{{ tab_data3|raw }}</div>
 				</div>
 			</div>
 			<div class="col-lg-4">
@@ -128,6 +158,7 @@ parent() }}
 					<div class="panel-body">
 						<div id="graph_cat"></div>
 					</div>
+					<div style="padding:10px">{{ tab_data5|raw }}</div>
 				</div>
 			</div>
 			
