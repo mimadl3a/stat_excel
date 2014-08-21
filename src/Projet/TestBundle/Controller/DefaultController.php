@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class DefaultController extends Controller
 {
-    public function indexAction(Request $req){
+    public function indexAction(Request $req){   	
     	$em = $this->getDoctrine()->getManager();
     	$document = new Document();
     	
@@ -90,7 +90,7 @@ class DefaultController extends Controller
     				$oDateNow = new \DateTime();
     				$oDateBirth = new \DateTime($sDateBirth);
     				$oDateIntervall = $oDateNow->diff($oDateBirth);
-    				$age = $oDateIntervall->y;
+    				$age = $oDateIntervall->y.".".$oDateIntervall->m;
     				
     			}
     			$date4 ="";

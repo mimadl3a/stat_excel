@@ -38,7 +38,7 @@ parent() }}
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h3 class="panel-title">
-							<i class="fa fa-bar-chart-o"></i> Pyramide des ages par site: " <b>{{ site }}</b> "
+							<i class="fa fa-bar-chart-o"></i> Pyramide des &acirc;ges par site: " <b>{{ site }}</b> "
 						</h3>
 					</div>
 					<div class="panel-body">
@@ -82,16 +82,13 @@ parent() }}
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h3 class="panel-title">
-							<i class="fa fa-bar-chart-o"></i> Pyramide par ancient&eacute; par site: " <b>{{ site }}</b> "
+							<i class="fa fa-bar-chart-o"></i> Pyramide par anciennet&eacute; par site: " <b>{{ site }}</b> "
 						</h3>
 					</div>
 					<div class="panel-body">
 						<div id="chart_div_an" style="height: 400px;"></div>
 					</div>
-				</div>
-				
-				
-				<table class="table table-bordered table-hover table-striped sortable" id="liste_cat">
+					<table class="table table-bordered table-hover table-striped sortable" id="liste_cat">
 					<thead>
 						<tr>
 							<td></td>
@@ -115,6 +112,10 @@ parent() }}
 						{% endfor %}
 					</tbody>
 					</table>
+				</div>
+				
+				
+				
 				
 				
 			</div>

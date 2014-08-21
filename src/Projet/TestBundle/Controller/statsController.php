@@ -121,9 +121,12 @@ class statsController extends Controller
     	$tab_data2[2] = array("Total");
     	$t_h = 0;
     	$t_f = 0;
-    	
+
     	$nbr_annees = array(
-    		'0 and 2.9','3 and 5.9','6 and 12.9','13 and 20.9','21 and 25.9','26 and 200'
+    		'0 and 1.99','2 and 4.99','5 and 11.99','12 and 19.99','20 and 24.99','25 and 200'
+    	);
+    	$nbr_annees0 = array(
+    		'0 - 2','3 - 5','6 - 12','13 - 20','21 - 25','26+'
     	);
     	$nbr_annees1 = array(
     		'0 <br>-<br> 2','3 <br>-<br> 5','6 <br>-<br> 12','13 <br>-<br> 20','21 <br>-<br> 25','26+', "Total"
@@ -133,6 +136,7 @@ class statsController extends Controller
     	$data_an_jason = "[";
     	$data_an_jason .= "['Ancien', 'Femme', 'Homme' ],";
     	 
+    	$i=0;
     	foreach ($nbr_annees as $nbr_annee){
     		$rsm = new ResultSetMappingBuilder($em);
     		$rsm->addScalarResult('nbr', 'count');
@@ -161,17 +165,15 @@ class statsController extends Controller
     		array_push($tab_data2[2], $data_an_h[0]['count']+$data_an_f[0]['count']);
     		
     		
-    	
-    		if($nbr_annee == "26 and 200"){
-    			$data_an_jason .= "['+26 ans', ".$data_an_f[0]['count'].", -"
-    				.$data_an_h[0]['count']."],";
+    		/*
+    		if($nbr_annee == "25 and 200"){
+    			$data_an_jason .= "['+25 ans', ".$data_an_f[0]['count'].", -".$data_an_h[0]['count']."],";
     		}else{
     			$str = str_replace('.9', "",str_replace(' and ', "-", $nbr_annee));
-    			$data_an_jason .= "['".$str
-    			." ans', ".$data_an_f[0]['count'].", -"
-    			.$data_an_h[0]['count']."],";
-    		}
-    		
+    			$data_an_jason .= "['".$str." ans', ".$data_an_f[0]['count'].", -".$data_an_h[0]['count']."],";
+    		}*/
+    		$data_an_jason .= "['".$nbr_annees0[$i]." ans', ".$data_an_f[0]['count'].", -".$data_an_h[0]['count']."],";
+    		$i++;
     	
     	}
 
@@ -308,7 +310,6 @@ class statsController extends Controller
         	)
 		);
     }
-
 	public function par_dateAction(Request $req){
 		$em = $this->getDoctrine()->getManager();
 		
@@ -861,12 +862,12 @@ class statsController extends Controller
 		
 		
 
-		//NBR TAUX TURN OVER
+		//NBR TURN OVER
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('nbr', 'count');
 		$total = $em->createNativeQuery("SELECT count(*) as nbr"
-				." FROM data d WHERE d.libSituation <> 'Actif'"
-				." AND d.dateEntree < '".$date."-12-31'".$st
+				." FROM data d WHERE"
+				." d.dateEntree < '".$date."-12-31'".$st
 				, $rsm)->getResult();
 		
 		$tnbr_trv = array();
@@ -879,13 +880,13 @@ class statsController extends Controller
 		//TAUX 5
 		$t5 = array();
 		if($n_depart[0][1]>0){
-			array_push($t5, array("<b>Taux de turn over</b>",substr(($n_depart[0][1]*100/$tnbr_trv[0][1]),0,4)." %"));
+			array_push($t5, array("<b>Turn over</b>",substr(($nbr_remp[0]['count']+$nbr_depart[0]['count'])/$total[0]['count'],0,4)));
 		}else{
-			array_push($t5, array("<b>Taux de turn over</b>","0 %"));
+			array_push($t5, array("<b>Turn over</b>","0 %"));
 		}
 		
-		array_push($tab_ratios,$n_depart);//REMPLIR TAB FINAL
-		array_push($tab_ratios,$tnbr_trv);//REMPLIR TAB FINAL
+		//array_push($tab_ratios,$n_depart);//REMPLIR TAB FINAL
+		//array_push($tab_ratios,$tnbr_trv);//REMPLIR TAB FINAL
 		array_push($tab_ratios,$t5);//REMPLIR TAB FINAL
 		
 		
@@ -972,7 +973,7 @@ class statsController extends Controller
 			$data_f = $em->createNativeQuery("SELECT count(*) as nbr_f"
 					." FROM data d"
 					." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
-					." AND d.dateEntree < '2014-".$a."-01'"
+					." AND d.dateEntree < '".date("Y")."-".$a."-01'"
 					." AND d.libSituation='Actif'".$st
 					, $rsm)->getResult();
 				
@@ -997,7 +998,7 @@ class statsController extends Controller
 			if($i<10)$a = "0".$i;
 			$data_m = $em->createNativeQuery("SELECT SUM(d.age) as age"
 					." FROM data d"
-					." WHERE d.dateEntree < '2014-".$a."-01'"
+					." WHERE d.dateEntree < '".date("Y")."-".$a."-01'"
 					." AND d.libSituation='Actif'".$st
 					, $rsm)->getResult();
 				
@@ -1021,11 +1022,11 @@ class statsController extends Controller
 			if($i<10)$a = "0".$i;
 			$data_m = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
-					." WHERE d.dateEntree <= '2014-".$a."-01'"
-					." AND round(DATEDIFF('2014-".$a."-01',dateEntree)/365)<=5"
+					." WHERE d.dateEntree <= '".date("Y")."-".$a."-01'"
+					." AND round(DATEDIFF('".date("Y")."-".$a."-01',dateEntree)/365)<5"
 					." AND d.libSituation='Actif'".$st
 					, $rsm)->getResult();
-			//echo $data_m[0]['count'].'<br><br>';
+			
 				
 			$calcul = substr($data_m[0]['count']/$total[0]['count'],0,4);
 			array_push($taux_anc, $calcul." ");
@@ -1051,7 +1052,7 @@ class statsController extends Controller
 			if($i<10)$a = "0".$i;
 			$data_s = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
-					." WHERE dateEntreeSituation like '2014-".$a."-%'"
+					." WHERE dateEntreeSituation like '".date("Y")."-".$a."-%'"
 					." AND d.libSituation like 'Demissionaire'".$st
 					, $rsm)->getResult();
 		
@@ -1077,12 +1078,12 @@ class statsController extends Controller
 			if($i<10)$a = "0".$i;
 			$data_s = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
-					." WHERE dateEntreeSituation like '2014-".$a."-%'"
+					." WHERE dateEntreeSituation like '".date("Y")."-".$a."-%'"
 					." AND d.libSituation like 'Démissionaire'"
 					, $rsm)->getResult();
 			$data_e = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
-					." WHERE d.dateEntree like '2014-".$a."-%'".$st
+					." WHERE d.dateEntree like '".date("Y")."-".$a."-%'".$st
 					, $rsm)->getResult();
 		
 			$calcul = substr($data_s[0]['count'] + $data_e[0]['count']/$total[0]['count'],0,8);
