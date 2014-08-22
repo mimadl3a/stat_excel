@@ -49,18 +49,24 @@ class statsController extends Controller
 
     	//DATA STATS POUR PYRAMIDE DES AGES
     	$ages = array(
-    		'15 and 19','20 and 24','25 and 29','30 and 34',
-    		'35 and 39','40 and 44','45 and 49','50 and 54','55 and 59','60 and 64'
+    		'15 and 19.99','20 and 24.99','25 and 29.99','30 and 34.99','35 and 39.99'
+    		,'40 and 44.99','45 and 49.99','50 and 54.99','55 and 59.99','60 and 64.99'
+    	);
+    	$ages0 = array(
+    		'15 - 20','21 - 25','26 - 30','31 - 35','36 - 40',
+    		'41 - 45','46 - 50','51 - 55','56 - 60','61 - 65',
     	);
     	$ages1 = array(
-    		'15 <br>-<br> 19','20 <br>-<br> 24','25 <br>-<br> 29','30 <br>-<br> 34',
-    		'35 <br>-<br> 39','40 <br>-<br> 44','45 <br>-<br> 49','50 <br>-<br> 54','55 <br>-<br> 59','60 <br>-<br> 64','Total'
+    		'15 <br>-<br> 20','21 <br>-<br> 25','26 <br>-<br> 30','31 <br>-<br> 35','36 <br>-<br> 40',
+    		'41 <br>-<br> 45','46 <br>-<br> 50','51 <br>-<br> 55','56 <br>-<br> 60','61 <br>-<br> 65',
+    		'Total'
     	);
     	
     	
     	$data_age_jason = "[";
     	$data_age_jason .= "['Age', 'Femme', 'Homme' ],";
-    	 
+    	
+    	$i = 0;
     	foreach ($ages as $age){
     		$rsm = new ResultSetMappingBuilder($em);
     		$rsm->addScalarResult('nbr', 'count');
@@ -86,8 +92,8 @@ class statsController extends Controller
     		array_push($tab_data1[2], $data_age_h[0]['count']+$data_age_f[0]['count']);
     	
 
-    		$data_age_jason .= "['".str_replace(' and ', "-", $age)." ans', ".$data_age_f[0]['count'].", -".$data_age_h[0]['count']."],";
-    		
+    		$data_age_jason .= "['".str_replace(' and ', "-", $ages0[$i])." ans', ".$data_age_f[0]['count'].", -".$data_age_h[0]['count']."],";
+    		$i++;
     		
     		
     	
@@ -925,7 +931,6 @@ class statsController extends Controller
 			)
 		);
 	}
-
 	public function indicateurAction(Request $req){
 		$em = $this->getDoctrine()->getManager();
 		$nbr = 0;

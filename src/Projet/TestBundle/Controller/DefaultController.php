@@ -94,13 +94,13 @@ class DefaultController extends Controller
     				
     			}
     			$date4 ="";
-    			if(preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $tab[53])){
-    				$d4 = new \DateTime($tab[53]);
+    			if(preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $tab[54])){
+    				$d4 = new \DateTime($tab[54]);
     				$date4 = date_format(new \DateTime($d4->format("Y-m-d")),"Y-m-d");
     			}
     			$date5 ="";
-    			if(preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $tab[49])){
-    				$d5 = new \DateTime($tab[49]);
+    			if(preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $tab[50])){
+    				$d5 = new \DateTime($tab[50]);
     				$date5 = date_format(new \DateTime($d5->format("Y-m-d")),"Y-m-d");
     			}
     			$query ="INSERT INTO DATA(libelleEtab,Classification,"
@@ -112,15 +112,15 @@ class DefaultController extends Controller
     					."'".$date1."',"
     					."'".utf8_encode($tab[12])."',"
     					."'".$date2."',"
-    					."'".$tab[15]."',"
+    					."'".$tab[14]."',"
     					."'".$date3."',"
     					.$age.","
-    					."'".$tab[52]."',"
+    					."'".$tab[53]."',"
     					."'".$date4."',"
     					."'".$tab[55]."',"
     					."'".$tab[56]."',"
     					."'".$date5."',"
-    					."'".$tab[51]."'"
+    					."'".$tab[52]."'"
     					.")";
     			
     			$stmt = $em->getConnection()->prepare($query);
