@@ -24,6 +24,11 @@ indicateur_stats:
     defaults: { _controller: PBundle:stats:indicateur }
         
     
+export_stats:
+    pattern:  /manager/stats/export
+    defaults: { _controller: PBundle:stats:export }
+        
+    
     
 
     

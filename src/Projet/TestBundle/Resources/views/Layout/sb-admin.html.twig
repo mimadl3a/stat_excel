@@ -54,8 +54,8 @@
             <li {% if "p_homepage" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_homepage') }}"><span class="glyphicon glyphicon-upload"></span> Transfert de donn&eacute;es</a></li>
             <li {% if "p_stats_hf_nbr" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_stats_hf_nbr') }}"><span class="glyphicon glyphicon-adjust"></span> Calculs normaux</a></li>
             <li {% if "p_stats_date" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('p_stats_date') }}"><span class="glyphicon glyphicon-adjust"></span> Calculs par date</a></li>
-           <li {% if "indicateur_stats" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('indicateur_stats') }}"><span class="glyphicon glyphicon-adjust"></span> Calcul des indicateurs</a></li>
-           
+            <li {% if "indicateur_stats" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('indicateur_stats') }}"><span class="glyphicon glyphicon-adjust"></span> Calcul des indicateurs</a></li>
+            <li {% if "export_stats" in app.request.attributes.get('_route') %}class="active"{% endif %}><a href="{{ path('export_stats') }}"><span class="glyphicon glyphicon-download"></span> Exporter PDF</a></li>
           </ul>
 
           <ul class="nav navbar-nav navbar-right navbar-user">

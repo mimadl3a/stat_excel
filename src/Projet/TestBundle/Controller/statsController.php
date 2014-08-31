@@ -1117,4 +1117,578 @@ class statsController extends Controller
 			)
 		);
 	}
+
+	public function exportAction(Request $req){
+
+		$em = $this->getDoctrine()->getManager();
+		$sites = array();
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('libelle', 'd.libelleEtab');
+		$sites = $em->createNativeQuery("SELECT d.libelleEtab as libelle FROM data d"
+				." GROUP BY d.libelleEtab"
+				, $rsm)->getResult();
+		 
+		 
+		$dataform = $req->request->all();
+		$st = "";
+		$site = "Tous";
+		if(isset($dataform['site']) and $dataform['site'] != "Tous"){
+			$st = " AND d.libelleEtab='".$dataform['site']."'";
+			$site = $dataform['site'];
+		}
+		$tab_data1 = array();
+		$tab_data1[0] = array("Homme");
+		$tab_data1[1] = array("Femme");
+		$tab_data1[2] = array("Total");
+		$t_h = 0;
+		$t_f = 0;
+		
+		//DATA STATS POUR PYRAMIDE DES AGES
+		$ages = array(
+				'15 and 19.99','20 and 24.99','25 and 29.99','30 and 34.99','35 and 39.99'
+				,'40 and 44.99','45 and 49.99','50 and 54.99','55 and 59.99','60 and 64.99'
+		);
+		$ages0 = array(
+				'15 - 20','21 - 25','26 - 30','31 - 35','36 - 40',
+				'41 - 45','46 - 50','51 - 55','56 - 60','61 - 65',
+		);
+		$ages1 = array(
+				'15 <br>-<br> 20','21 <br>-<br> 25','26 <br>-<br> 30','31 <br>-<br> 35','36 <br>-<br> 40',
+				'41 <br>-<br> 45','46 <br>-<br> 50','51 <br>-<br> 55','56 <br>-<br> 60','61 <br>-<br> 65',
+				'Total'
+		);
+		 
+		 
+		$data_age_jason = "[";
+		$data_age_jason .= "['Age', 'Femme', 'Homme' ],";
+		 
+		$i = 0;
+		foreach ($ages as $age){
+			$rsm = new ResultSetMappingBuilder($em);
+			$rsm->addScalarResult('nbr', 'count');
+			 
+			$data_age_f = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
+					." WHERE age between ".$age
+					." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
+					." AND d.libSituation = 'Actif'".$st
+					, $rsm)->getResult();
+			array_push($tab_data1[1], $data_age_f[0]['count']);
+			$t_f += $data_age_f[0]['count'];
+		
+			$data_age_h = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
+					." WHERE age between ".$age
+					." AND d.libelleSexe = 'Masculin'"
+					." AND d.libSituation = 'Actif'".$st
+					, $rsm)->getResult();
+			array_push($tab_data1[0], $data_age_h[0]['count']);
+			$t_h += $data_age_h[0]['count'];
+		
+		
+		
+			array_push($tab_data1[2], $data_age_h[0]['count']+$data_age_f[0]['count']);
+		
+			$i++;
+		
+		
+			 
+		}
+		//TOTAL
+		array_push($tab_data1[0], $t_h);
+		array_push($tab_data1[1], $t_f);
+		array_push($tab_data1[2], $t_h+$t_f);
+		 
+		
+		
+		$html = "<h2>Statistiques par ages</h2>";
+		$html .= "<table border='1' cellspacing='0' cellpadding='5' style='font-family:tahoma'>";
+			//AGES
+			$html .= "<tr>";
+			$html .= "<td>Ages</td>";
+				foreach ($ages1 as $age){
+					$html .= "<td>".$age."</td>";
+				}
+			$html .= "<tr>";
+
+			//DATA AGE
+			foreach ($tab_data1 as $data){
+				$html .= "<tr>";
+				foreach ($data as $valeur){
+					$html .= "<td>".$valeur."</td>";
+				}
+				$html .= "<tr>";
+			}
+		
+		$html .= "</table>";
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
+		//DATA STATS PAR ANCIENTE
+		
+		$tab_data2 = array();
+		$tab_data2[0] = array("Homme");
+		$tab_data2[1] = array("Femme");
+		$tab_data2[2] = array("Total");
+		$t_h = 0;
+		$t_f = 0;
+		
+		$nbr_annees = array(
+				'0 and 1.99','2 and 4.99','5 and 11.99','12 and 19.99','20 and 24.99','25 and 200'
+		);
+		$nbr_annees0 = array(
+				'0 - 2','3 - 5','6 - 12','13 - 20','21 - 25','26+'
+		);
+		$nbr_annees1 = array(
+				'0 <br>-<br> 2','3 <br>-<br> 5','6 <br>-<br> 12','13 <br>-<br> 20','21 <br>-<br> 25','26+', "Total"
+		);
+		
+		
+		$data_an_jason = "[";
+		$data_an_jason .= "['Ancien', 'Femme', 'Homme' ],";
+		
+		$i=0;
+		foreach ($nbr_annees as $nbr_annee){
+			$rsm = new ResultSetMappingBuilder($em);
+			$rsm->addScalarResult('nbr', 'count');
+			 
+			$data_an_f = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
+					." WHERE DATEDIFF(CONCAT_WS('-',YEAR(CURDATE()),MONTH(CURDATE()),'01'),dateEntree)/365"
+					." between ".$nbr_annee
+					." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
+					." AND d.libSituation = 'Actif'".$st
+					, $rsm)->getResult();
+			array_push($tab_data2[1], $data_an_f[0]['count']);
+			$t_f += $data_an_f[0]['count'];
+		
+		
+			$data_an_h = $em->createNativeQuery("SELECT count(d.id) as nbr FROM data d"
+					." WHERE DATEDIFF(CONCAT_WS('-',YEAR(CURDATE()),MONTH(CURDATE()),'01'),dateEntree)/365"
+					." between ".$nbr_annee
+					." AND d.libelleSexe = 'Masculin'"
+					." AND d.libSituation = 'Actif'".$st
+					, $rsm)->getResult();
+			array_push($tab_data2[0], $data_an_h[0]['count']);
+			$t_h += $data_an_h[0]['count'];
+		
+		
+		
+			array_push($tab_data2[2], $data_an_h[0]['count']+$data_an_f[0]['count']);
+		
+			$i++;
+			 
+		}
+		
+		array_push($tab_data2[0], $t_h);
+		array_push($tab_data2[1], $t_f);
+		array_push($tab_data2[2], $t_f+$t_h);
+		
+		
+		
+		
+		
+		
+		
+		$html .= "<h2>Statistiques par anciennet&eacute;</h2>";
+		$html .= "<table border='1' cellspacing='0' cellpadding='5' style='font-family:tahoma'>";
+			//AGES
+			$html .= "<tr>";
+			$html .= "<td>Annee</td>";
+				foreach ($nbr_annees1 as $age){
+					$html .= "<td>".$age."</td>";
+				}
+			$html .= "<tr>";
+
+			//DATA ANCIENNETE
+			foreach ($tab_data2 as $data){
+				$html .= "<tr>";
+				foreach ($data as $valeur){
+					$html .= "<td>".$valeur."</td>";
+				}
+				$html .= "<tr>";
+			}
+		
+		$html .= "</table>";
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
+
+		//DATA POUR NOMBRE DE FEMMES ET HOMMES
+		$background_colors = array('#CD00CD', '#8B1C62', '#EE4000', '#FFEFD5');
+		$tab_data3 = "";
+		 
+		 
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$rsm->addScalarResult('libelle', 'd.libelleSexe');
+		
+		$data_st_jason = "";
+		
+		$data_st = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle FROM data d"
+				." WHERE d.libSituation = 'Actif'".$st
+				." GROUP BY d.libelleSexe"
+				, $rsm)->getResult();
+		
+		$data_st_jason .= "[";
+		$o = 0;
+		$col ="";
+		foreach ($data_st as $data){
+			$tab_data3 .= "<b>".$data['d.libelleSexe']."</b>: ".$data['count']."<br>";
+			$col .= "'".$background_colors[$o]."',";
+			$o++;
+		}
+		
+		
+		
+		$html .= "<h2>Statistiques par sexe</h2>";
+		$html .= "".$tab_data3;
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
+		//DATA POUR NOMBRE DE CDI ET CDD
+		$background_colors1 = array('#8B7500','#7FFF00', '#FFEFD5', '#EE4000', '#495E67');
+		$tab_data4 = "";
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$rsm->addScalarResult('typec', 'd.typeContrat');
+		 
+		$data_sty_jason = "";
+		 
+		$data_sty = $em->createNativeQuery("SELECT count(d.id) as nbr, d.typeContrat as typec FROM data d"
+				." WHERE d.libSituation = 'Actif'".$st
+				." GROUP BY d.typeContrat"
+				, $rsm)->getResult();
+		 
+		$data_sty_jason .= "[";
+		$o1 = 0;
+		$col1 ="";
+		foreach ($data_sty as $data){
+			$tab_data4 .= "<b>".$data['d.typeContrat']."</b>: ".$data['count']."<br>";
+			$col1 .= "'".$background_colors1[$o1]."',";
+			$o1++;
+		}
+		
+		
+		$html .= "<h2>Statistiques par type de contrat</h2>";
+		$html .= "".$tab_data4;
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
+		//DATA POUR NOMBRE PAR CATEGORIE
+		$background_colors2 = array('#495E67','#8B7500', '#EE4000', '#7FFF00', '#FFEFD5');
+		$tab_data5 = "";
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$rsm->addScalarResult('cat', 'd.classification');
+		 
+		$data_cat_jason = "";
+		 
+		$data_cat = $em->createNativeQuery("SELECT count(d.id) as nbr, d.classification as cat FROM data d"
+				." WHERE d.libSituation = 'Actif'".$st
+				." GROUP BY d.classification"
+				, $rsm)->getResult();
+		 
+		$data_cat_jason .= "[";
+		$o2 = 0;
+		$col2 ="";
+		foreach ($data_cat as $data){
+			$tab_data5 .= "<b>".$data['d.classification']."</b>: ".$data['count']."<br>";
+			$col2 .= "'".$background_colors2[$o2]."',";
+			$o2++;
+		}
+		$html .= "<h2>Statistiques par classification</h2>";
+		$html .= "".$tab_data5;
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
+		$sites = array();
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('libelle', 'd.libelleEtab');
+		$sites = $em->createNativeQuery("SELECT d.libelleEtab as libelle FROM data d"
+				." GROUP BY d.libelleEtab"
+				, $rsm)->getResult();
+			
+			
+		$dataform = $req->request->all();
+		$st = "";
+		$site = "Tous";
+		if(isset($dataform['site']) and $dataform['site'] != "Tous"){
+			$st = " AND d.libelleEtab='".$dataform['site']."'";
+			$site = $dataform['site'];
+		}
+		
+		$date = date("Y");
+		if($req->get('startDate'))$date = $req->get('startDate');
+		
+		$tab = array();
+		
+		$tab_data1 = array();
+		$tab_data1[0] = array("Homme", array("0","0","0","0","0","0","0","0","0","0","0","0"));
+		$tab_data1[1] = array("Femme", array("0","0","0","0","0","0","0","0","0","0","0","0"));
+		
+		
+		for ($i = 1 ;$i <= 12; $i++){
+			if($i<10){
+				$tab[$i] = array($date."-0".$i, 0, 0);
+			}else{
+				$tab[$i] = array($date."-".$i, 0, 0);
+			}
+		}
+		
+		//DATA POUR NOMBRE DE FEMMES ET HOMMES EMBOUCHES PAR ANNEE DONNEE
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		$rsm->addScalarResult('libelle', 'd.libelleSexe');
+		$rsm->addScalarResult('dt', 'd.dateEntree');
+		
+		$data_all_jason = "";
+		
+		
+		$data_f = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle,"
+				." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt FROM data d"
+				." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
+				." AND d.dateEntree like '".$date."-%'".$st
+				." AND d.libSituation='Actif'"
+				." GROUP BY dt"
+				, $rsm)->getResult();
+		$data_h = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle,"
+				." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt FROM data d"
+				." WHERE d.libelleSexe = 'Masculin'"
+				." AND d.dateEntree like '".$date."-%'".$st
+				." AND d.libSituation='Actif'"
+				." GROUP BY dt"
+				, $rsm)->getResult();
+		
+		
+		$data_all_jason .= "[";
+		foreach ($data_h as $data){
+			for ($i = 1 ;$i <= 12; $i++){
+				if($tab[$i][0] == $data['d.dateEntree']){
+					$tab[$i][1] = $data['count'];
+					$tab_data1[0][1][$i-1] = $data['count'];
+				}
+			}
+		}
+		foreach ($data_f as $data){
+			for ($i = 1 ;$i <= 12; $i++){
+				if($tab[$i][0] == $data['d.dateEntree']){
+					$tab[$i][2] = $data['count'];
+					$tab_data1[1][1][$i-1] = $data['count'];
+				}
+			}
+		}
+		
+		$data_all_jason .= "]";
+		//END----------------------------------------------------------------------
+		
+		
+		
+		
+		$html .= "<h2>Nombre d'embouch&eacute;s par sexe</h2>";
+		$html .= "<table border='1' cellspacing='0' cellpadding='5' style='font-family:tahoma'>";
+			$html .= "<tr><td>Date:</td>";
+			for ($i = 1 ;$i <= 12; $i++){
+				$html .= "<td>".$tab[$i][0]."</td>";
+			}
+			$html .= "</tr>";
+			$html .= "<tr><td>Homme</td>";
+			foreach ($tab_data1[0][1] as $data){
+				$html .= "<td>".$data."</td>";
+			}
+			$html .= "</tr>";
+			$html .= "<tr><td>Femme</td>";
+			foreach ($tab_data1[1][1] as $data){
+				$html .= "<td>".$data."</td>";
+			}
+			$html .= "</tr>";
+		$html .= "</table>";
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+
+		//DATA POUR NOMBRE EMBOUCHES PAR CAT PAR ANNEE DONNEE
+		$tab1 = array();
+		$catstab = array("","");
+		$cats_libelle = array();
+		$o = 0;
+		
+		
+		$tab_data2 = array();
+		
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('classification', 'd.classification');
+		$cats = $em->createNativeQuery("SELECT d.classification"
+				." FROM data d WHERE 1=1".$st
+				." GROUP BY d.classification"
+				." ORDER BY d.classification DESC"
+				, $rsm)->getResult();
+		$cats_json = "[";
+		foreach ($cats as $c){
+			$tab_data2[$o] = array($c['d.classification'], array("0","0","0","0","0","0","0","0","0","0","0","0"));
+			$catstab[$o] = "";
+			$cats_libelle[$o] = $c;
+			$o++;
+			$cats_json .= "'".$c['d.classification']."',";
+		}
+		$cats_json .= "]";
+		
+		for ($i = 1 ;$i <= 12; $i++){
+			if($i<10){
+				$t = range(0, count($catstab));
+				$t[0] = $date."-0".$i;
+				$tab1[$i] = $t;
+			}else{
+				$t = range(0, count($catstab));
+				$t[0] = $date."-".$i;
+				$tab1[$i] = $t;
+			}
+		}
+		
+		$data_allt_jason = "[";
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		for ($i = 1 ;$i <= 12; $i++){
+			$data_allt_jason .= "{y: '".$tab1[$i][0]."',";
+			for($j = 0 ;$j < count($cats_libelle); $j++){
+				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.classification as classification,"
+						." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt "
+						." FROM data d"
+						." WHERE d.dateEntree like '".$tab1[$i][0]."-%'"
+						." AND d.classification = '".$cats_libelle[$j]['d.classification']."'".$st
+						." AND d.libSituation='Actif'"
+						." GROUP BY dt"
+						, $rsm)->getResult();
+		
+		
+		
+				if($datas){
+					$tab1[$i][$j+1] = $datas[0]['count'];						
+					$tab_data2[$j][1][$i-1] = $datas[0]['count'];
+				}else{
+					$tab1[$i][$j+1] = "0";		
+					$tab_data2[$j][1][$i-1] = "0";
+				}
+			}
+		}
+		
+		
+		
+		//END----------------------------------------------------------------------
+		
+		
+		
+		
+		
+		$html .= "<h2>Nombre d'embouch&eacute;s par cat&eacute;gorie:</h2>";
+		$html .= "<table border='1' cellspacing='0' cellpadding='5' style='font-family:tahoma'>";
+		
+		
+		$html .= "<tr><td>Date:</td>";
+		for ($i = 1 ;$i <= 12; $i++){
+			$html .= "<td>".$tab[$i][0]."</td>";
+		}
+			$html .= "</tr>";
+		
+		for ($i = 0 ;$i <= count($tab_data2)-1; $i++){
+			$html .= "<tr><td>".$tab_data2[$i][0]."</td>";
+				for ($j = 1 ;$j <= 12; $j++){
+					$html .= "<td>".$tab_data2[$i][1][$j-1]."</td>";
+				}
+			$html .= "</tr>";
+		}
+		
+		$html .= "</table>";
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		/*
+		$fichier = "Export__".date("Y-m-d")."__".time();
+		return new Response(
+				$this->get('knp_snappy.pdf')->getOutputFromHtml($html),
+				200,
+				array(
+						'Content-Type'          => 'application/pdf',
+						'Content-Disposition'   => 'attachment; filename="'.$fichier.'.pdf"'
+				)
+		);
+		*/
+		
+		
+		return new Response($html);
+		
+	}
 }

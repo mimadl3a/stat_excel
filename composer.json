@@ -21,8 +21,9 @@
 		"sensio/framework-extra-bundle" : "~3.0",
 		"sensio/generator-bundle" : "~2.3",
 		"incenteev/composer-parameter-handler" : "~2.0",
-		"ddeboer/data-import-bundle":"~0.1",
-		"phpoffice/phpexcel": "dev-develop"
+		"ddeboer/data-import-bundle" : "~0.1",
+		"phpoffice/phpexcel" : "dev-develop",
+		"knplabs/knp-snappy-bundle": "dev-master"
 	},
 	"scripts" : {
 		"post-install-cmd" : [
