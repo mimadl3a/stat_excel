@@ -171,7 +171,7 @@ parent() }}
 								<div id="morris-line-chart"></div>
 							</div>
 							
-				<table class="table table-bordered table-hover table-striped sortable" id="liste_cat">
+				<table class="table table-bordered table-hover table-striped sortable" style='font-size: 12px'>
 					<thead>
 						<tr>
 							<td></td>
@@ -187,11 +187,11 @@ parent() }}
 						{% for data in tab_data1 %}
 						<tr>
 							<td>
-								{{ data[0] }}
+								{{ data[0]|raw }}
 							</td>
 							{% for d in data[1] %}
 							<td>
-								{{ d }}
+								{{ d|raw }}
 							</td>
 							{% endfor %}
 						</tr>
@@ -218,7 +218,7 @@ parent() }}
 							</div>
 							
 							
-				<table class="table table-bordered table-hover table-striped sortable" id="liste_cat">
+				<table class="table table-bordered table-hover table-striped sortable" style='font-size: 12px'>
 					<thead>
 						<tr>
 							<td></td>
@@ -234,11 +234,11 @@ parent() }}
 						{% for data in tab_data2 %}
 						<tr>
 							<td>
-								{{ data[0] }}
+								{{ data[0]|raw }}
 							</td>
 							{% for d in data[1] %}
 							<td>
-								{{ d }}
+								{{ d|raw }}
 							</td>
 							{% endfor %}
 						</tr>
@@ -264,7 +264,7 @@ parent() }}
 							<div class="panel-body">
 								<div id="morris-line-chart-type"></div>
 							</div>		
-				<table class="table table-bordered table-hover table-striped sortable" id="liste_cat">
+				<table class="table table-bordered table-hover table-striped sortable" style='font-size: 12px'>
 					<thead>
 						<tr>
 							<td></td>
@@ -280,11 +280,11 @@ parent() }}
 						{% for data in tab_data3 %}
 						<tr>
 							<td>
-								{{ data[0] }}
+								{{ data[0]|raw }}
 							</td>
 							{% for d in data[1] %}
 							<td>
-								{{ d }}
+								{{ d|raw }}
 							</td>
 							{% endfor %}
 						</tr>

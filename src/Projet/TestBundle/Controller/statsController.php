@@ -53,12 +53,12 @@ class statsController extends Controller
     		,'40 and 44.99','45 and 49.99','50 and 54.99','55 and 59.99','60 and 64.99'
     	);
     	$ages0 = array(
-    		'15 - 20','21 - 25','26 - 30','31 - 35','36 - 40',
-    		'41 - 45','46 - 50','51 - 55','56 - 60','61 - 65',
+    		'15 - 20','20 - 25','25 - 30','30 - 35','35 - 40',
+    		'40 - 45','45 - 50','50 - 55','55 - 60','60 - 65',
     	);
     	$ages1 = array(
-    		'15 <br>-<br> 20','21 <br>-<br> 25','26 <br>-<br> 30','31 <br>-<br> 35','36 <br>-<br> 40',
-    		'41 <br>-<br> 45','46 <br>-<br> 50','51 <br>-<br> 55','56 <br>-<br> 60','61 <br>-<br> 65',
+    		'15 <br>-<br> 20','20 <br>-<br> 25','25 <br>-<br> 30','30 <br>-<br> 35','35 <br>-<br> 40',
+    		'40 <br>-<br> 45','45 <br>-<br> 50','50 <br>-<br> 55','55 <br>-<br> 60','60 <br>-<br> 65',
     		'Total'
     	);
     	
@@ -132,10 +132,10 @@ class statsController extends Controller
     		'0 and 1.99','2 and 4.99','5 and 11.99','12 and 19.99','20 and 24.99','25 and 200'
     	);
     	$nbr_annees0 = array(
-    		'0 - 2','3 - 5','6 - 12','13 - 20','21 - 25','26+'
+    		'0 - 2','2 - 5','5 - 12','12 - 20','20 - 25','25+'
     	);
     	$nbr_annees1 = array(
-    		'0 <br>-<br> 2','3 <br>-<br> 5','6 <br>-<br> 12','13 <br>-<br> 20','21 <br>-<br> 25','26+', "Total"
+    		'0 <br>-<br> 2','2 <br>-<br> 5','5 <br>-<br> 12','12 <br>-<br> 20','20 <br>-<br> 25','25+', "Total"
     	);
     	 
     	 
@@ -344,8 +344,9 @@ class statsController extends Controller
 		$tab = array();
 		
 		$tab_data1 = array();
-		$tab_data1[0] = array("Homme", array("0","0","0","0","0","0","0","0","0","0","0","0"));
-		$tab_data1[1] = array("Femme", array("0","0","0","0","0","0","0","0","0","0","0","0"));
+		$tab_data1[0] = array("Homme", array("0","0","0","0","0","0","0","0","0","0","0","0","0"));
+		$tab_data1[1] = array("Femme", array("0","0","0","0","0","0","0","0","0","0","0","0","0"));
+		$tab_data1[2] = array("<b>Total</b>", array("0","0","0","0","0","0","0","0","0","0","0","0","0"));
 		
 		
 		for ($i = 1 ;$i <= 12; $i++){
@@ -355,6 +356,7 @@ class statsController extends Controller
 				$tab[$i] = array($date."-".$i, 0, 0);
 			}			
 		}
+		$tab[13] = array("<b>Total</b>", 0, 0);;
 		
 		//DATA POUR NOMBRE DE FEMMES ET HOMMES EMBOUCHES PAR ANNEE DONNEE
 		$rsm = new ResultSetMappingBuilder($em);
@@ -379,32 +381,36 @@ class statsController extends Controller
 				." AND d.libSituation='Actif'"
 				." GROUP BY dt"
 				, $rsm)->getResult();
-		
-						
+
 		$data_all_jason .= "[";
 		foreach ($data_h as $data){
 			for ($i = 1 ;$i <= 12; $i++){
 				if($tab[$i][0] == $data['d.dateEntree']){
 					$tab[$i][1] = $data['count'];
 					$tab_data1[0][1][$i-1] = $data['count'];
+					$tab_data1[2][1][$i-1] += $data['count'];
+					$tab_data1[0][1][12] += $data['count'];
 				}
 			}
 		}
+		
 		foreach ($data_f as $data){
 			for ($i = 1 ;$i <= 12; $i++){
 				if($tab[$i][0] == $data['d.dateEntree']){
 					$tab[$i][2] = $data['count'];
 					$tab_data1[1][1][$i-1] = $data['count'];
+					$tab_data1[2][1][$i-1] += $data['count'];
+					$tab_data1[1][1][12] += $data['count'];
 				}
 			}
 		}
+		$tab_data1[2][1][12] = $tab_data1[1][1][12]+$tab_data1[0][1][12];
 		for ($i = 1 ;$i <= 12; $i++){
 			$data_all_jason .= "{y: '".$tab[$i][0]."', a: ".$tab[$i][1].", b:".$tab[$i][2]."},";
 		}
 		
 		$data_all_jason .= "]";
 		//END----------------------------------------------------------------------
-		
 		
 		
 		
@@ -435,13 +441,14 @@ class statsController extends Controller
 				, $rsm)->getResult();
 		$cats_json = "[";
 		foreach ($cats as $c){
-			$tab_data2[$o] = array($c['d.classification'], array("0","0","0","0","0","0","0","0","0","0","0","0"));
+			$tab_data2[$o] = array($c['d.classification'], array("0","0","0","0","0","0","0","0","0","0","0","0","0"));
 			$catstab[$o] = "";
 			$cats_libelle[$o] = $c;
 			$o++;
 			$cats_json .= "'".$c['d.classification']."',";
 		}
 		$cats_json .= "]";
+		$tab_data2[count($cats)+1] = array("<b>Total</b>", array("0","0","0","0","0","0","0","0","0","0","0","0","0"));
 		
 		for ($i = 1 ;$i <= 12; $i++){
 			if($i<10){
@@ -455,6 +462,7 @@ class statsController extends Controller
 			}
 		}
 		
+		$total = 0;
 		$data_allt_jason = "[";
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('nbr', 'count');
@@ -475,8 +483,11 @@ class statsController extends Controller
 				if($datas){
 					$tab1[$i][$j+1] = $datas[0]['count'];
 					$data_allt_jason .= $cats_libelle[$j]['d.classification'].": ".$datas[0]['count'].",";
-					
+
 					$tab_data2[$j][1][$i-1] = $datas[0]['count'];
+					$tab_data2[$j][1][12] += $datas[0]['count'];
+					$tab_data2[count($cats)+1][1][$i-1] += $datas[0]['count'];
+					$total +=  $datas[0]['count'];
 				}else{
 					$tab1[$i][$j+1] = "0";
 					$data_allt_jason .= $cats_libelle[$j]['d.classification'].": 0,";
@@ -486,6 +497,7 @@ class statsController extends Controller
 			}
 			$data_allt_jason .= "},";
 		}
+		$tab_data2[count($cats)+1][1][12] = $total;
 		
 		
 		
@@ -518,13 +530,14 @@ class statsController extends Controller
 				, $rsm)->getResult();
 		$types_json = "[";
 		foreach ($types as $c){
-			$tab_data3[$o] = array($c['d.typeContrat'], array("0","0","0","0","0","0","0","0","0","0","0","0"));
+			$tab_data3[$o] = array($c['d.typeContrat'], array("0","0","0","0","0","0","0","0","0","0","0","0","0"));
 			$typetab[$o] = "";
 			$types_libelle[$o] = $c;
 			$o++;
 			$types_json .= "'".$c['d.typeContrat']."',";
 		}
 		$types_json .= "]";
+		$tab_data3[count($types)+1] = array("<b>Total</b>", array("0","0","0","0","0","0","0","0","0","0","0","0","0"));
 		
 		for ($i = 1 ;$i <= 12; $i++){
 			if($i<10){
@@ -538,6 +551,7 @@ class statsController extends Controller
 			}
 		}
 		
+		$total = 0;
 		$data_alltype_jason = "[";
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('nbr', 'count');
@@ -558,6 +572,10 @@ class statsController extends Controller
 					$data_alltype_jason .= $types_libelle[$j]['d.typeContrat'].": ".$datas[0]['count'].",";
 					
 					$tab_data3[$j][1][$i-1] = $datas[0]['count'];
+					$tab_data3[$j][1][12] += $datas[0]['count'];
+					$tab_data3[count($types)+1][1][$i-1] += $datas[0]['count'];
+					$total += $datas[0]['count'];
+					
 				}else{
 					$tab1[$i][$j+1] = "0";
 					$data_alltype_jason .= $types_libelle[$j]['d.typeContrat'].": 0,";
@@ -568,7 +586,7 @@ class statsController extends Controller
 			}
 			$data_alltype_jason .= "},";
 		}
-		
+		$tab_data3[count($types)+1][1][12] = $total;
 		
 		
 		$data_alltype_jason .= "]";
@@ -696,8 +714,7 @@ class statsController extends Controller
 		$npromo_libelle[$oo][0] = array("d.nouvelleSituation"=>"<b><i>Total</i></b>");
 		$npromo_libelle[$oo][1] = $tab_total;
 		
-		$s_motif = $sexe;
-		array_push($s_motif, array("d.classification" => "Total"));
+		array_push($sexe, "Total");
 		//END----------------------------------------------------------------------
 		
 		
@@ -756,7 +773,7 @@ class statsController extends Controller
 
 		//TAUX 1
 		$t1 = array();
-		array_push($t1, array("<b>Taux de sortie</b>",substr(($n_depart[0][1]*100/$t_total[0][1]),0,4)." %"));
+		array_push($t1, array("<b>Taux de sortie</b>",substr(($n_depart[0][1]/$t_total[0][1]),0,8)." "));
 		array_push($tab_ratios,$t1);//REMPLIR TAB FINAL 
 		
 		
@@ -1058,15 +1075,15 @@ class statsController extends Controller
 			$data_s = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
 					." WHERE dateEntreeSituation like '".date("Y")."-".$a."-%'"
-					." AND d.libSituation like 'Demissionaire'".$st
+					." AND d.libSituation <> 'Actif'".$st
 					, $rsm)->getResult();
 		
-			$calcul = substr($data_s[0]['count']/$total[0]['count'],0,8);
-			array_push($taux_dep, $calcul." %");
+			$calcul = substr(($data_s[0]['count']/$total[0]['count'])*100,0,8);
+			array_push($taux_dep, $calcul." ");
 			$tt += $calcul;
 		
 		}
-		array_push($taux_dep, substr($tt/date("m"),0,8)." %");
+		array_push($taux_dep, substr($tt/date("m"),0,8)." ");
 		//----------------------------------
 		
 		
@@ -1663,6 +1680,71 @@ class statsController extends Controller
 		
 		
 		
+
+		//DATA POUR NOMBRE EMBOUCHES PAR TYPE DE CONTRAT(CDI, CDD) PAR MOIS DONNEE
+		$tab2 = array();
+		$typetab = array("","");
+		$types_libelle = array();
+		$o = 0;
+		
+		$tab_data3 = array();
+		
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('typeContrat', 'd.typeContrat');
+		$types = $em->createNativeQuery("SELECT d.typeContrat"
+				." FROM data d where 1=1".$st
+				." GROUP BY d.typeContrat"
+				." ORDER BY d.typeContrat DESC"
+				, $rsm)->getResult();
+		$types_json = "[";
+		foreach ($types as $c){
+			$tab_data3[$o] = array($c['d.typeContrat'], array("0","0","0","0","0","0","0","0","0","0","0","0"));
+			$typetab[$o] = "";
+			$types_libelle[$o] = $c;
+			$o++;
+			$types_json .= "'".$c['d.typeContrat']."',";
+		}
+		$types_json .= "]";
+		
+		for ($i = 1 ;$i <= 12; $i++){
+			if($i<10){
+				$t = range(0, count($typetab));
+				$t[0] = $date."-0".$i;
+				$tab1[$i] = $t;
+			}else{
+				$t = range(0, count($typetab));
+				$t[0] = $date."-".$i;
+				$tab1[$i] = $t;
+			}
+		}
+		
+		$data_alltype_jason = "[";
+		$rsm = new ResultSetMappingBuilder($em);
+		$rsm->addScalarResult('nbr', 'count');
+		for ($i = 1 ;$i <= 12; $i++){
+			$data_alltype_jason .= "{y: '".$tab1[$i][0]."',";
+			for($j = 0 ;$j < count($types_libelle); $j++){
+				$datas = $em->createNativeQuery("SELECT count(*) as nbr, d.typeContrat as typeContrat,"
+						." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt"
+						." FROM data d"
+						." WHERE d.dateEntree like '".$tab1[$i][0]."-%'"
+						." AND d.typeContrat = '".$types_libelle[$j]['d.typeContrat']."'".$st
+						." AND d.libSituation='Actif'"
+						." GROUP BY dt"
+						, $rsm)->getResult();
+		
+				if($datas){
+					$tab1[$i][$j+1] = $datas[0]['count'];
+					$tab_data3[$j][1][$i-1] = $datas[0]['count'];
+				}else{
+					$tab1[$i][$j+1] = "0";						
+					$tab_data3[$j][1][$i-1] = "0";
+				}
+		
+			}
+		}
+		
+		//END----------------------------------------------------------------------
 		
 		
 		
@@ -1672,10 +1754,33 @@ class statsController extends Controller
 		
 		
 		
+		$html .= "<h2>Nombre d'embouch&eacute;s par type de contrat:</h2>";
+		$html .= "<table border='1' cellspacing='0' cellpadding='5' style='font-family:tahoma'>";
+		
+		
+		$html .= "<tr><td>Date:</td>";
+		for ($i = 1 ;$i <= 12; $i++){
+			$html .= "<td>".$tab[$i][0]."</td>";
+		}
+			$html .= "</tr>";
+		
+		for ($i = 0 ;$i <= count($tab_data3)-1; $i++){
+			$html .= "<tr><td>".$tab_data3[$i][0]."</td>";
+				for ($j = 1 ;$j <= 12; $j++){
+					$html .= "<td>".$tab_data3[$i][1][$j-1]."</td>";
+				}
+			$html .= "</tr>";
+		}
+		
+		$html .= "</table>";
 		
 		
 		
-		/*
+		
+		
+		
+		
+		
 		$fichier = "Export__".date("Y-m-d")."__".time();
 		return new Response(
 				$this->get('knp_snappy.pdf')->getOutputFromHtml($html),
@@ -1685,10 +1790,10 @@ class statsController extends Controller
 						'Content-Disposition'   => 'attachment; filename="'.$fichier.'.pdf"'
 				)
 		);
-		*/
 		
 		
-		return new Response($html);
+		/*
+		return new Response($html);*/
 		
 	}
 }
