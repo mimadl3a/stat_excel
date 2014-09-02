@@ -773,7 +773,7 @@ class statsController extends Controller
 
 		//TAUX 1
 		$t1 = array();
-		array_push($t1, array("<b>Taux de sortie</b>",substr(($n_depart[0][1]/$t_total[0][1]),0,8)." "));
+		array_push($t1, array("<b>Taux de sortie</b>",substr((($n_depart[0][1]/$t_total[0][1])*100)/date("m"),0,8)." "));
 		array_push($tab_ratios,$t1);//REMPLIR TAB FINAL 
 		
 		
@@ -995,9 +995,10 @@ class statsController extends Controller
 			$data_f = $em->createNativeQuery("SELECT count(*) as nbr_f"
 					." FROM data d"
 					." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
-					." AND d.dateEntree < '".date("Y")."-".$a."-01'"
+					." AND d.dateEntree < '".date("Y")."-".$a."-".cal_days_in_month(CAL_GREGORIAN, $a, date("Y"))."'"
 					." AND d.libSituation='Actif'".$st
 					, $rsm)->getResult();
+			
 				
 			$calcul = round(($data_f[0]['count']*100)/$total[0]['count'],2);
 			array_push($taux_femme, $calcul." %");
@@ -1020,7 +1021,7 @@ class statsController extends Controller
 			if($i<10)$a = "0".$i;
 			$data_m = $em->createNativeQuery("SELECT SUM(d.age) as age"
 					." FROM data d"
-					." WHERE d.dateEntree < '".date("Y")."-".$a."-01'"
+					." WHERE d.dateEntree < '".date("Y")."-".$a."-".cal_days_in_month(CAL_GREGORIAN, $a, date("Y"))."'"
 					." AND d.libSituation='Actif'".$st
 					, $rsm)->getResult();
 				
@@ -1044,7 +1045,7 @@ class statsController extends Controller
 			if($i<10)$a = "0".$i;
 			$data_m = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
-					." WHERE d.dateEntree <= '".date("Y")."-".$a."-01'"
+					." WHERE d.dateEntree <= '".date("Y")."-".$a."-".cal_days_in_month(CAL_GREGORIAN, $a, date("Y"))."'"
 					." AND round(DATEDIFF('".date("Y")."-".$a."-01',dateEntree)/365)<5"
 					." AND d.libSituation='Actif'".$st
 					, $rsm)->getResult();
@@ -1108,12 +1109,12 @@ class statsController extends Controller
 					." WHERE d.dateEntree like '".date("Y")."-".$a."-%'".$st
 					, $rsm)->getResult();
 		
-			$calcul = substr($data_s[0]['count'] + $data_e[0]['count']/$total[0]['count'],0,8);
-			array_push($taux_rot, $calcul." %");
+			$calcul = substr($data_s[0]['count'] + $data_e[0]['count']/$total[0]['count']*10,0,4);
+			array_push($taux_rot, $calcul." ");
 			$tt += $calcul;
 		
 		}
-		array_push($taux_rot, substr($tt/date("m"),0,8)." %");
+		array_push($taux_rot, round($tt/date("m"),2)." ");
 		//----------------------------------
 		
 		
@@ -1135,6 +1136,18 @@ class statsController extends Controller
 		);
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public function exportAction(Request $req){
 
 		$em = $this->getDoctrine()->getManager();
