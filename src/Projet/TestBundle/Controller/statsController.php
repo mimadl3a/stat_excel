@@ -35,10 +35,15 @@ class statsController extends Controller
     	
     	$dataform = $req->request->all();
     	$st = "";
-    	$site = "Tous";
-    	if(isset($dataform['site']) and $dataform['site'] != "Tous"){
-    		$st = " AND d.libelleEtab='".$dataform['site']."'";
-    		$site = $dataform['site'];
+    	$site = "";
+    	if(isset($dataform['site']) and $dataform['site']){
+    		$st = " AND (";
+    		foreach ($dataform['site'] as $ddd){
+    			$st .= " d.libelleEtab='".$ddd."' or ";
+    			$site .= $ddd." ";
+    		}
+    		$st .= ")";
+    		$st = str_replace("or )", ")", $st);
     	}
     	$tab_data1 = array();
     	$tab_data1[0] = array("Homme");
@@ -330,13 +335,19 @@ class statsController extends Controller
 				, $rsm)->getResult();
 		 
 		 
-		$dataform = $req->request->all();
-		$st = "";
-		$site = "Tous";
-		if(isset($dataform['site']) and $dataform['site'] != "Tous"){
-			$st = " AND d.libelleEtab='".$dataform['site']."'";
-			$site = $dataform['site'];
-		}
+	
+    	$dataform = $req->request->all();
+    	$st = "";
+    	$site = "";
+    	if(isset($dataform['site']) and $dataform['site']){
+    		$st = " AND (";
+    		foreach ($dataform['site'] as $ddd){
+    			$st .= " d.libelleEtab='".$ddd."' or ";
+    			$site .= $ddd." ";
+    		}
+    		$st .= ")";
+    		$st = str_replace("or )", ")", $st);
+    	}
 		
 		$date = date("Y");
 		if($req->get('startDate'))$date = $req->get('startDate');
@@ -953,13 +964,19 @@ class statsController extends Controller
 		$nbr = 0;
 		
 
-		$dataform = $req->request->all();
-		$st = "";
-		$site = "Tous";
-		if(isset($dataform['site']) and $dataform['site'] != "Tous"){
-			$st = " AND d.libelleEtab='".$dataform['site']."'";
-			$site = $dataform['site'];
-		}
+	
+    	$dataform = $req->request->all();
+    	$st = "";
+    	$site = "";
+    	if(isset($dataform['site']) and $dataform['site']){
+    		$st = " AND (";
+    		foreach ($dataform['site'] as $ddd){
+    			$st .= " d.libelleEtab='".$ddd."' or ";
+    			$site .= $ddd." ";
+    		}
+    		$st .= ")";
+    		$st = str_replace("or )", ")", $st);
+    	}
 		
 		$sites = array();
 		$rsm = new ResultSetMappingBuilder($em);

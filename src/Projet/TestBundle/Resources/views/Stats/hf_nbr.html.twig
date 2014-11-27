@@ -18,9 +18,8 @@ parent() }}
 				</div>
 				<div class="col-md-8">
 					<form method="post" action="{{ path('p_stats_hf_nbr') }}">
-						<div class="col-md-6">
-							<select name="site" class="form-control">
-								<option>Tous</option>
+						<div class="col-md-8">
+							<select name="site[]" class="form-control" multiple="multiple">
 								{% for site in sites %}
 									<option>{{ site['d.libelleEtab'] }}</option>
 								{% endfor %}
