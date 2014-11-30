@@ -12,26 +12,35 @@ parent() }}
 
 			
 			
+		<form method="post" action="{{ path('p_stats_hf_nbr') }}">
 			<div class="col-md-12">
 				<div class="col-md-2">
 					Sites: 
 				</div>
-				<div class="col-md-8">
-					<form method="post" action="{{ path('p_stats_hf_nbr') }}">
-						<div class="col-md-8">
-							<select name="site[]" class="form-control" multiple="multiple">
-								{% for site in sites %}
-									<option>{{ site['d.libelleEtab'] }}</option>
-								{% endfor %}
-							</select>
-						</div>
-						<div class="col-md-2">
-							<input type="submit" class="btn btn-primary">
-						</div>
-					</form>
-				<br><br>
+				<div class="col-md-4">
+					<select name="site[]" class="form-control" multiple="multiple">
+						{% for site in sites %}
+							<option>{{ site['d.libelleEtab'] }}</option>
+						{% endfor %}
+					</select>
+				</div>				
+				<div class="col-md-2">
+					Statut: 
+				</div>
+				<div class="col-md-4">
+					<select name="statut" class="form-control">
+							<option {% if statut == 'Tous' %}selected{% endif %}>Tous</option>
+							<option {% if statut == 'OUV' %}selected{% endif %}>OUV</option>
+							<option {% if statut == 'HORS OUV' %}selected{% endif %}>HORS OUV</option>
+					</select>
 				</div>				
 			</div>
+			
+			<div class="col-md-12">
+				<input type="submit" class="btn btn-primary pull-right">
+				<br><br>
+			</div>
+		</form>
 			<div class="col-lg-12">
 
 				<div class="panel panel-primary">

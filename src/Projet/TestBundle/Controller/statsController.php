@@ -33,7 +33,16 @@ class statsController extends Controller
     		, $rsm)->getResult();
     	
     	
+    	
     	$dataform = $req->request->all();
+    	
+    	$statut = "";
+    	if(isset($dataform['statut'])){
+    		if($dataform['statut'] == "OUV")$statut = " AND d.Classification = 'OUV'";
+    		if($dataform['statut'] == "HORS OUV")$statut = " AND d.Classification <> 'OUV'";
+    		if($dataform['statut'] == "Tous")$statut = "";
+    	}
+    	
     	$st = "";
     	$site = "";
     	if(isset($dataform['site']) and $dataform['site']){
@@ -80,6 +89,7 @@ class statsController extends Controller
     				." WHERE age between ".$age
     				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
     				." AND d.libSituation = 'Actif'".$st
+    				.$statut
     				, $rsm)->getResult();
     		array_push($tab_data1[1], $data_age_f[0]['count']);
     		$t_f += $data_age_f[0]['count'];
@@ -88,6 +98,7 @@ class statsController extends Controller
     				." WHERE age between ".$age
     				." AND d.libelleSexe = 'Masculin'"
     				." AND d.libSituation = 'Actif'".$st
+    				.$statut
     				, $rsm)->getResult();
     		array_push($tab_data1[0], $data_age_h[0]['count']);
     		$t_h += $data_age_h[0]['count'];
@@ -157,6 +168,7 @@ class statsController extends Controller
     				." between ".$nbr_annee
     				." AND (d.libelleSexe = 'Feminin' or d.libelleSexe = 'f')"
     				." AND d.libSituation = 'Actif'".$st
+    				.$statut
     				, $rsm)->getResult();
     		array_push($tab_data2[1], $data_an_f[0]['count']);
     		$t_f += $data_an_f[0]['count'];
@@ -167,6 +179,7 @@ class statsController extends Controller
     				." between ".$nbr_annee
     				." AND d.libelleSexe = 'Masculin'"
     				." AND d.libSituation = 'Actif'".$st
+    				.$statut
     				, $rsm)->getResult();
     		array_push($tab_data2[0], $data_an_h[0]['count']);
     		$t_h += $data_an_h[0]['count'];
@@ -219,6 +232,7 @@ class statsController extends Controller
     	 
     	$data_st = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle FROM data d"
     			." WHERE d.libSituation = 'Actif'".$st
+    			.$statut
     			." GROUP BY d.libelleSexe"
     			, $rsm)->getResult();
     	 
@@ -248,6 +262,7 @@ class statsController extends Controller
     	
     	$data_sty = $em->createNativeQuery("SELECT count(d.id) as nbr, d.typeContrat as typec FROM data d"
     			." WHERE d.libSituation = 'Actif'".$st
+    			.$statut
     			." GROUP BY d.typeContrat"
     			, $rsm)->getResult();
     	
@@ -278,8 +293,10 @@ class statsController extends Controller
     	
     	$data_cat_jason = "";
     	
+    	
     	$data_cat = $em->createNativeQuery("SELECT count(d.id) as nbr, d.classification as cat FROM data d"
     			." WHERE d.libSituation = 'Actif'".$st
+    			.$statut
     			." GROUP BY d.classification"
     			, $rsm)->getResult();
     	
@@ -297,6 +314,8 @@ class statsController extends Controller
     	
     	 
 		//SELECT LAST_DAY(CURRENT_DATE)
+		$sss = "";
+		if(isset($dataform['statut']))$sss = $dataform['statut'];
     	 
     	
         return $this->render('PBundle:Stats:hf_nbr.html.twig',
@@ -317,7 +336,8 @@ class statsController extends Controller
 				"nbr_annees" => $nbr_annees1,
 				"tab_data3" => $tab_data3,
 				"tab_data4" => $tab_data4,
-				"tab_data5" => $tab_data5
+				"tab_data5" => $tab_data5,
+				"statut"	=> $sss
         	)
 		);
     }
@@ -337,6 +357,15 @@ class statsController extends Controller
 		 
 	
     	$dataform = $req->request->all();
+    	
+    	$statut = "";
+    	if(isset($dataform['statut'])){
+    		if($dataform['statut'] == "OUV")$statut = " AND d.Classification = 'OUV'";
+    		if($dataform['statut'] == "HORS OUV")$statut = " AND d.Classification <> 'OUV'";
+    		if($dataform['statut'] == "Tous")$statut = "";
+    	}
+    	
+    	
     	$st = "";
     	$site = "";
     	if(isset($dataform['site']) and $dataform['site']){
@@ -382,14 +411,14 @@ class statsController extends Controller
 				." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt FROM data d"
 				." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
 				." AND d.dateEntree like '".$date."-%'".$st
-				." AND d.libSituation='Actif'"
+				." AND d.libSituation='Actif'".$statut
 				." GROUP BY dt"
 				, $rsm)->getResult();
 		$data_h = $em->createNativeQuery("SELECT count(d.id) as nbr, d.libelleSexe as libelle,"
 				." DATE_FORMAT(d.dateEntree,'%Y-%m') as dt FROM data d"
 				." WHERE d.libelleSexe = 'Masculin'"
 				." AND d.dateEntree like '".$date."-%'".$st
-				." AND d.libSituation='Actif'"
+				." AND d.libSituation='Actif'".$statut
 				." GROUP BY dt"
 				, $rsm)->getResult();
 
@@ -446,7 +475,7 @@ class statsController extends Controller
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('classification', 'd.classification');
 		$cats = $em->createNativeQuery("SELECT d.classification"
-				." FROM data d WHERE 1=1".$st
+				." FROM data d WHERE 1=1".$st.$statut
 				." GROUP BY d.classification"
 				." ORDER BY d.classification DESC"
 				, $rsm)->getResult();
@@ -535,7 +564,7 @@ class statsController extends Controller
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('typeContrat', 'd.typeContrat');
 		$types = $em->createNativeQuery("SELECT d.typeContrat"
-				." FROM data d where 1=1".$st
+				." FROM data d where 1=1".$st.$statut
 				." GROUP BY d.typeContrat"
 				." ORDER BY d.typeContrat DESC"
 				, $rsm)->getResult();
@@ -574,7 +603,7 @@ class statsController extends Controller
 						." FROM data d"
 						." WHERE d.dateEntree like '".$tab1[$i][0]."-%'"
 						." AND d.typeContrat = '".$types_libelle[$j]['d.typeContrat']."'".$st
-						." AND d.libSituation='Actif'"
+						." AND d.libSituation='Actif'".$statut
 						." GROUP BY dt"
 						, $rsm)->getResult();
 		
@@ -619,7 +648,7 @@ class statsController extends Controller
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('libSituation', 'd.libSituation');
 		$motifs = $em->createNativeQuery("SELECT d.libSituation"
-				." FROM data d WHERE d.libSituation<>'Actif'".$st
+				." FROM data d WHERE d.libSituation<>'Actif'".$st.$statut
 				." GROUP BY d.libSituation"
 				." ORDER BY d.libSituation DESC"
 				, $rsm)->getResult();
@@ -635,7 +664,7 @@ class statsController extends Controller
 				$count = $em->createNativeQuery("SELECT count(*) as nbr"
 						." FROM data d WHERE d.libSituation='".$c['d.libSituation']."'"
 						." AND d.classification = '".$cat['d.classification']."'"
-						." AND d.dateEntreeSituation like '".$date."-%'".$st
+						." AND d.dateEntreeSituation like '".$date."-%'".$st.$statut
 						, $rsm)->getResult();
 				array_push($cats_c, $count[0]['count']);
 			}
@@ -683,7 +712,7 @@ class statsController extends Controller
 		$rsm = new ResultSetMappingBuilder($em);
 		$rsm->addScalarResult('nouvelleSituation', 'd.nouvelleSituation');
 		$libelles = $em->createNativeQuery("SELECT d.nouvelleSituation"
-				." FROM data d WHERE d.nouvelleSituation<>''".$st
+				." FROM data d WHERE d.nouvelleSituation<>''".$st.$statut
 				." GROUP BY d.nouvelleSituation"
 				." ORDER BY d.nouvelleSituation DESC"
 				, $rsm)->getResult();
@@ -699,7 +728,7 @@ class statsController extends Controller
 				$count = $em->createNativeQuery("SELECT count(*) as nbr"
 						." FROM data d WHERE d.nouvelleSituation='".$c['d.nouvelleSituation']."'"
 						." AND d.libelleSexe = '".$s."'"
-						." AND d.datePromo like '".$date."-%'".$st
+						." AND d.datePromo like '".$date."-%'".$st.$statut
 						, $rsm)->getResult();
 				array_push($promos_c, $count[0]['count']);
 			}
@@ -759,7 +788,7 @@ class statsController extends Controller
 		$rsm->addScalarResult('nbr', 'count');
 		$nbr_depart = $em->createNativeQuery("SELECT count(*) as nbr"
 				." FROM data d WHERE d.libSituation<>'Actif'"
-				." AND d.dateEntreeSituation like '".$date."-%'".$st
+				." AND d.dateEntreeSituation like '".$date."-%'".$st.$statut
 				, $rsm)->getResult();
 		$n_depart = array();
 		array_push($n_depart, array("Nombre de départs",$nbr_depart[0]['count']));
@@ -773,7 +802,7 @@ class statsController extends Controller
 		$rsm->addScalarResult('nbr', 'count');
 		$nbr_total = $em->createNativeQuery("SELECT count(*) as nbr"
 				." FROM data d WHERE d.libSituation = 'Actif'"
-				." AND d.dateEntree < '".$date."-12-31'".$st
+				." AND d.dateEntree < '".$date."-12-31'".$st.$statut
 				, $rsm)->getResult();
 		$t_total = array();
 		array_push($t_total, array("Nombre total actif",$nbr_total[0]['count']));
@@ -802,7 +831,7 @@ class statsController extends Controller
 		$rsm->addScalarResult('nbr', 'count');
 		$nbr_dem = $em->createNativeQuery("SELECT count(*) as nbr"
 				." FROM data d WHERE d.libSituation = 'Demissionaire'"
-				." AND d.dateEntreeSituation like '".$date."-%'".$st
+				." AND d.dateEntreeSituation like '".$date."-%'".$st.$statut
 				, $rsm)->getResult();
 		$tnbr_dem = array();
 		array_push($tnbr_dem, array("Nombre de démissionaires",$nbr_dem[0]['count']));
@@ -835,7 +864,7 @@ class statsController extends Controller
 		$rsm->addScalarResult('nbr', 'count');
 		$nbr_remp = $em->createNativeQuery("SELECT count(*) as nbr"
 				." FROM data d"
-				." WHERE d.dateEntree like '".$date."-%'".$st
+				." WHERE d.dateEntree like '".$date."-%'".$st.$statut
 				, $rsm)->getResult();
 		
 		$tnbr_remp = array();
@@ -868,7 +897,7 @@ class statsController extends Controller
 		$rsm->addScalarResult('nbr', 'count');
 		$nbr_remp_h = $em->createNativeQuery("SELECT count(*) as nbr"
 				." FROM data d WHERE d.classification <> 'OUV'"
-				." AND d.dateEntree like '".$date."-%'".$st
+				." AND d.dateEntree like '".$date."-%'".$st.$statut
 				, $rsm)->getResult();
 		
 		$tnbr_remp_h = array();
@@ -901,7 +930,7 @@ class statsController extends Controller
 		$rsm->addScalarResult('nbr', 'count');
 		$total = $em->createNativeQuery("SELECT count(*) as nbr"
 				." FROM data d WHERE"
-				." d.dateEntree < '".$date."-12-31'".$st
+				." d.dateEntree < '".$date."-12-31'".$st.$statut
 				, $rsm)->getResult();
 		
 		$tnbr_trv = array();
@@ -932,7 +961,8 @@ class statsController extends Controller
 		
 		
 		
-		
+		$sss = "";
+		if(isset($dataform['statut']))$sss = $dataform['statut'];
 		
 		
 		
@@ -955,6 +985,7 @@ class statsController extends Controller
 				"tab_data1" => $tab_data1,
 				"tab_data2" => $tab_data2,
 				"tab_data3" => $tab_data3,
+				"statut"	=> $sss
 				
 			)
 		);
@@ -966,6 +997,14 @@ class statsController extends Controller
 
 	
     	$dataform = $req->request->all();
+    	
+    	$statut = "";
+    	if(isset($dataform['statut'])){
+    		if($dataform['statut'] == "OUV")$statut = " AND d.Classification = 'OUV'";
+    		if($dataform['statut'] == "HORS OUV")$statut = " AND d.Classification <> 'OUV'";
+    		if($dataform['statut'] == "Tous")$statut = "";
+    	}
+    	
     	$st = "";
     	$site = "";
     	if(isset($dataform['site']) and $dataform['site']){
@@ -1000,7 +1039,7 @@ class statsController extends Controller
 		$taux_femme = array();
 		
 		$rsm->addScalarResult('nb', 'count');
-		$total = $em->createNativeQuery("select count(*) as nb from data d where d.libSituation='Actif'".$st
+		$total = $em->createNativeQuery("select count(*) as nb from data d where d.libSituation='Actif'".$st.$statut
 				, $rsm)->getResult();
 		$tt = 0;
 		for($i = 1; $i <= date("m"); $i++){
@@ -1013,7 +1052,7 @@ class statsController extends Controller
 					." FROM data d"
 					." WHERE (d.libelleSexe = 'Feminin' or d.libelleSexe = 'F')"
 					." AND d.dateEntree < '".date("Y")."-".$a."-".cal_days_in_month(CAL_GREGORIAN, $a, date("Y"))."'"
-					." AND d.libSituation='Actif'".$st
+					." AND d.libSituation='Actif'".$st.$statut
 					, $rsm)->getResult();
 			
 				
@@ -1039,7 +1078,7 @@ class statsController extends Controller
 			$data_m = $em->createNativeQuery("SELECT SUM(d.age) as age"
 					." FROM data d"
 					." WHERE d.dateEntree < '".date("Y")."-".$a."-".cal_days_in_month(CAL_GREGORIAN, $a, date("Y"))."'"
-					." AND d.libSituation='Actif'".$st
+					." AND d.libSituation='Actif'".$st.$statut
 					, $rsm)->getResult();
 				
 			$calcul = round($data_m[0]['d.age']/$total[0]['count']);
@@ -1064,7 +1103,7 @@ class statsController extends Controller
 					." FROM data d"
 					." WHERE d.dateEntree <= '".date("Y")."-".$a."-".cal_days_in_month(CAL_GREGORIAN, $a, date("Y"))."'"
 					." AND round(DATEDIFF('".date("Y")."-".$a."-01',dateEntree)/365)<5"
-					." AND d.libSituation='Actif'".$st
+					." AND d.libSituation='Actif'".$st.$statut
 					, $rsm)->getResult();
 			
 				
@@ -1093,7 +1132,7 @@ class statsController extends Controller
 			$data_s = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
 					." WHERE dateEntreeSituation like '".date("Y")."-".$a."-%'"
-					." AND d.libSituation <> 'Actif'".$st
+					." AND d.libSituation <> 'Actif'".$st.$statut
 					, $rsm)->getResult();
 		
 			$calcul = substr(($data_s[0]['count']/$total[0]['count'])*100,0,8);
@@ -1123,7 +1162,7 @@ class statsController extends Controller
 					, $rsm)->getResult();
 			$data_e = $em->createNativeQuery("SELECT count(d.id) as nbr"
 					." FROM data d"
-					." WHERE d.dateEntree like '".date("Y")."-".$a."-%'".$st
+					." WHERE d.dateEntree like '".date("Y")."-".$a."-%'".$st.$statut
 					, $rsm)->getResult();
 		
 			$calcul = substr($data_s[0]['count'] + $data_e[0]['count']/$total[0]['count']*10,0,4);
@@ -1137,7 +1176,8 @@ class statsController extends Controller
 		
 		
 		
-		
+		$sss = "";
+		if(isset($dataform['statut']))$sss = $dataform['statut'];
 		
 		return $this->render("PBundle:Stats:indicateur.html.twig",
 			array(
@@ -1148,7 +1188,8 @@ class statsController extends Controller
 				'taux_dep' => $taux_dep,
 				'taux_rot' => $taux_rot,
 				'sites' => $sites,
-				'site' => $site
+				'site' => $site,
+				"statut"=> $sss
 			)
 		);
 	}
